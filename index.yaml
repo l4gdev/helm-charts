@@ -3,14 +3,14 @@ entries:
   freescout:
   - apiVersion: v2
     appVersion: php8.2-1.17.72
-    created: "2025-01-20T01:02:13.672059937Z"
+    created: "2025-01-20T01:13:31.753052184Z"
     dependencies:
     - condition: mariadb.enabled
       name: mariadb
       repository: https://charts.bitnami.com/bitnami
       version: ~11.x
     description: A Helm chart for Kubernetes
-    digest: 73bb666bd8554d1c31cb7299cd00b685d807d9c704b91d00af205229ee4f9fd0
+    digest: 073d128e65122389ddf582cdc78005d086c90fad6406ed2f39164a41f6c54909
     icon: https://freescout.net/apple-touch-icon.png
     maintainers:
     - email: contact@l4g.dev
@@ -18,6 +18,6 @@ entries:
     name: freescout
     type: application
     urls:
-    - https://l4gdev.github.io/helm-charts/charts/freescout-0.1.0.tgz
+    - https://github.com/l4gdev/helm-charts/blob/gh-pages/charts/freescout-0.1.0.tgz
     version: 0.1.0
-generated: "2025-01-20T01:02:13.668194502Z"
+generated: "2025-01-20T01:13:31.748677988Z"
