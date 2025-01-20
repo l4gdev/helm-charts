@@ -22,7 +22,7 @@ jobs:
           helm_version: 3.7.2
           token: ${{ secrets.GITHUB_TOKEN }}
           charts_dir: charts
-          charts_url: https://github.com/l4gdev/helm-charts/raw/refs/heads/gh-pages/
+          charts_url: https://l4gdev.github.io/helm-charts/
           branch: gh-pages
           target_dir: charts
           index_dir: .
