@@ -110,11 +110,12 @@ spec:
           - name: SITE_URL
             value: {{ .Values.freescout.site_url | quote }}
           {{- range $line := splitList "\n" .Values.freescout.additional_envs }}
-            {{- $kv := splitList "=" $line -}}
-            {{- $k := first $kv -}}
-            {{- if $k }}
-              {{ $k }}: {{ last $kv | quote }}
-            {{- end }}
+          {{- $kv := splitList "=" $line -}}
+          {{- $k := first $kv -}}
+          {{- if $k }}
+          - name: {{ $k }}
+            value: {{ last $kv | quote }}
+          {{- end }}
           {{- end }}
           ports:
             - name: http
