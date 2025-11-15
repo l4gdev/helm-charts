@@ -7,10 +7,6 @@ metadata:
   labels:
     {{- include "overpass-api.labels" . | nindent 4 }}
     app.kubernetes.io/component: init
-  annotations:
-    helm.sh/hook: pre-install,pre-upgrade
-    helm.sh/hook-weight: "-5"
-    helm.sh/hook-delete-policy: before-hook-creation
 spec:
   backoffLimit: {{ .Values.initJob.backoffLimit }}
   {{- if .Values.initJob.ttlSecondsAfterFinished }}
@@ -66,7 +62,7 @@ spec:
             - /bin/sh
             - -c
             - |
-              set -e
+              set -ex  # Enable verbose mode with -x
 
               # Check if already initialized
               if [ -f /db/.initialized ]; then
@@ -74,33 +70,16 @@ spec:
                 exit 0
               fi
 
-              echo "Starting Overpass API initialization in mode: ${OVERPASS_MODE}"
+              echo "========================================="
+              echo "Starting Overpass API initialization"
+              echo "Mode: ${OVERPASS_MODE}"
+              echo "========================================="
+              echo ""
 
-              # Run the initialization
-              # The container will stop after initialization completes
-              # and create a marker file to indicate success
-
-              # Wait for initialization to complete
-              # The container's initialization script handles this
-              sleep infinity &
-              SLEEP_PID=$!
-
-              # Wait for the /db directory to be populated
-              while [ ! -f /db/nodes.bin ] && [ -d /proc/$SLEEP_PID ]; do
-                echo "Waiting for database initialization to complete..."
-                sleep 30
-              done
-
-              # Create marker file to indicate successful initialization
-              if [ -f /db/nodes.bin ]; then
-                echo "Database initialization completed successfully"
-                touch /db/.initialized
-                kill $SLEEP_PID 2>/dev/null || true
-                exit 0
-              else
-                echo "Database initialization failed or incomplete"
-                exit 1
-              fi
+              # The wiktorn/overpass-api image runs /app/docker-entrypoint.sh
+              # which handles initialization based on environment variables
+              echo "Running initialization via docker-entrypoint.sh..."
+              exec /app/docker-entrypoint.sh
           envFrom:
             - configMapRef:
                 name: {{ include "overpass-api.fullname" . }}
