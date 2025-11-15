@@ -7,6 +7,9 @@ metadata:
   labels:
     {{- include "overpass-api.labels" . | nindent 4 }}
     app.kubernetes.io/component: init
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
 spec:
   backoffLimit: {{ .Values.initJob.backoffLimit }}
   {{- if .Values.initJob.ttlSecondsAfterFinished }}

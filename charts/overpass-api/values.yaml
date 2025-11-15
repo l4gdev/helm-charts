@@ -61,7 +61,8 @@ config:
   spaceQuota: ""
 
   # -- Planet file URL for init mode (e.g., Geofabrik extract)
-  # Example: https://download.geofabrik.de/europe/poland-latest.osm.pbf
+  # IMPORTANT: Only .osm.bz2 files are supported (not .osm.pbf)
+  # Example: https://download.geofabrik.de/europe/poland-latest.osm.bz2
   planetUrl: ""
 
   # -- Diff repository URL for updates

@@ -72,7 +72,8 @@ The chart uses a two-phase deployment to prevent PVC multi-attach errors during 
 helm install overpass l4gdev/overpass-api \
   --set initJob.enabled=true \
   --set config.mode=init \
-  --set config.planetUrl=https://download.geofabrik.de/europe/luxembourg-latest.osm.bz2
+  --set config.planetUrl=https://download.geofabrik.de/europe/luxembourg-latest.osm.bz2 \
+  # Only .osm.bz2 files are supported
 ```
 
 Wait for the init job to complete (this may take 10-60 minutes depending on data size). Monitor progress:
@@ -135,7 +136,8 @@ Downloads and processes OSM data from scratch:
 ```yaml
 config:
   mode: init
-  planetUrl: "https://download.geofabrik.de/europe/poland-latest.osm.pbf"
+  # Note: Only .osm.bz2 files are supported (not .osm.pbf)
+  planetUrl: "https://download.geofabrik.de/europe/poland-latest.osm.bz2"
   diffUrl: "https://download.openstreetmap.fr/replication/europe/poland/minute/"
 ```
 
@@ -151,7 +153,8 @@ resources:
 
 config:
   mode: init
-  planetUrl: "https://download.geofabrik.de/europe/poland-latest.osm.pbf"
+  # Note: Only .osm.bz2 files are supported (not .osm.pbf)
+  planetUrl: "https://download.geofabrik.de/europe/poland-latest.osm.bz2"
   diffUrl: "https://download.openstreetmap.fr/replication/europe/poland/minute/"
   meta: "yes"
   compression: "lz4"

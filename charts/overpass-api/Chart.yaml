@@ -18,7 +18,7 @@ maintainers:
   - name: L4G
     email: contact@l4g.dev
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "latest"
 annotations:
   artifacthub.io/category: integration-delivery
@@ -36,11 +36,7 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |
-    - kind: fixed
-      description: Fixed multi-attach PVC error by making StatefulSet conditional on initJob flag
-    - kind: fixed
-      description: Removed Helm hooks for simpler resource management
-    - kind: fixed
-      description: Fixed init job to properly run docker-entrypoint.sh
     - kind: changed
-      description: Added verbose logging to init job for better monitoring
+      description: Init job now auto-deletes and recreates on upgrades for easier configuration updates
+    - kind: added
+      description: Added values.schema.json for Artifact Hub UI support
