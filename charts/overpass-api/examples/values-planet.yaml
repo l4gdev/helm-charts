@@ -1,0 +1,147 @@
+# Full planet deployment
+# Uses clone mode for faster initialization
+# Requires significant resources (see xlarge preset)
+
+# Extra-large resource preset for planet database
+resources:
+  preset: xlarge
+
+config:
+  # Clone mode recommended for planet (faster than init)
+  mode: clone
+
+  # Source instance for cloning
+  cloneUrl: "https://overpass-api.de/api/"
+
+  # Planet-level minutely diffs
+  diffUrl: "https://planet.openstreetmap.org/replication/minute/"
+
+  # Full metadata for planet
+  meta: "yes"
+
+  # LZ4 compression
+  compression: "lz4"
+
+  # High process count for planet
+  fastcgiProcesses: 16
+
+  # Disable areas for planet (too resource-intensive)
+  useAreas: false
+
+  # Frequent updates for planet
+  updateSleep: 1800  # Every 30 minutes
+
+  # Resource quotas for queries
+  timeQuota: "10000"
+  spaceQuota: "68719476736"  # 64GB
+
+# Persistence configuration for planet
+persistence:
+  enabled: true
+  size: 1Ti
+  # Use high-performance storage class
+  storageClass: "fast-ssd"
+
+# Service configuration
+service:
+  type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+
+# Ingress for external access
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      client_max_body_size 0;
+      proxy_buffering off;
+  hosts:
+    - host: overpass-planet.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: overpass-planet-tls
+      hosts:
+        - overpass-planet.example.com
+
+# Monitoring for planet deployment
+monitoring:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      prometheus: kube-prometheus
+
+# Init job with high resources
+initJob:
+  enabled: true
+  resources:
+    requests:
+      cpu: 16
+      memory: 64Gi
+    limits:
+      cpu: 32
+      memory: 128Gi
+  ttlSecondsAfterFinished: 172800  # Clean up after 48h
+  backoffLimit: 1  # Don't retry automatically
+
+# Pod disruption budget for high availability
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Node selector for dedicated nodes
+nodeSelector:
+  workload: overpass-planet
+
+# Tolerations for tainted nodes
+tolerations:
+  - key: "overpass"
+    operator: "Equal"
+    value: "planet"
+    effect: "NoSchedule"
+
+# Affinity rules
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+            - key: "node.kubernetes.io/instance-type"
+              operator: In
+              values:
+                - "r5.8xlarge"
+                - "r5.12xlarge"
+
+# Increase termination grace period for planet
+terminationGracePeriodSeconds: 300
+
+# Health probe configuration for planet
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 300
+  periodSeconds: 60
+  timeoutSeconds: 30
+  failureThreshold: 5
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 120
+  periodSeconds: 30
+  timeoutSeconds: 20
+  failureThreshold: 5
+
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 20
+  failureThreshold: 60  # Allow 30 minutes for startup

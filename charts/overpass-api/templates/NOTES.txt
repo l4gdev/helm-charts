@@ -1,0 +1,106 @@
+{{- $fullname := include "overpass-api.fullname" . -}}
+****************************************************************************
+***   Overpass API has been deployed successfully!                      ***
+****************************************************************************
+
+Release Name:    {{ .Release.Name }}
+Namespace:       {{ .Release.Namespace }}
+Mode:            {{ .Values.config.mode }}
+Resource Preset: {{ .Values.resources.preset }}
+
+{{- if .Values.initJob.enabled }}
+
+INITIALIZATION STATUS:
+----------------------
+The initialization job has been created. Monitor its progress with:
+
+  kubectl -n {{ .Release.Namespace }} get jobs {{ $fullname }}-init
+  kubectl -n {{ .Release.Namespace }} logs -f job/{{ $fullname }}-init
+
+This may take several hours depending on data size and mode:
+- Clone mode: 30 minutes to several hours
+- Init mode:  Several hours to days (especially for planet database)
+
+The main StatefulSet will start after initialization completes.
+{{- end }}
+
+ACCESSING THE API:
+------------------
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+  External URL: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}{{ (index .paths 0).path }}
+{{- end }}
+{{- else if contains "LoadBalancer" .Values.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+  Watch the status with:
+
+  kubectl -n {{ .Release.Namespace }} get svc {{ $fullname }} --watch
+
+  Once available, access the API at:
+
+  export SERVICE_IP=$(kubectl -n {{ .Release.Namespace }} get svc {{ $fullname }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo "http://$SERVICE_IP:{{ .Values.service.port }}/api/interpreter"
+
+{{- else if contains "ClusterIP" .Values.service.type }}
+  The API is available within the cluster at:
+
+  http://{{ $fullname }}.{{ .Release.Namespace }}.svc.cluster.local/api/interpreter
+
+  For external access, use port-forwarding:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ $fullname }} 8080:{{ .Values.service.port }}
+
+  Then access the API at: http://localhost:8080/api/interpreter
+{{- end }}
+
+MONITORING STATUS:
+------------------
+Check the StatefulSet status:
+
+  kubectl -n {{ .Release.Namespace }} get statefulset {{ $fullname }}
+  kubectl -n {{ .Release.Namespace }} get pods -l app.kubernetes.io/name={{ include "overpass-api.name" . }}
+
+View logs:
+
+  kubectl -n {{ .Release.Namespace }} logs -f statefulset/{{ $fullname }}
+
+{{- if .Values.persistence.enabled }}
+
+STORAGE:
+--------
+{{- if .Values.persistence.existingClaim }}
+Using existing PVC: {{ .Values.persistence.existingClaim }}
+{{- else }}
+PVC created: {{ $fullname }}
+Storage size: {{ include "overpass-api.storageSize" . }}
+{{- end }}
+
+To view storage usage:
+
+  kubectl -n {{ .Release.Namespace }} exec -it {{ $fullname }}-0 -- du -sh /db
+{{- end }}
+
+TESTING THE API:
+----------------
+Once the service is running, test with a simple query:
+
+  curl "http://<API_URL>/api/interpreter?data=[out:json];node(1);out;"
+
+Or use the status endpoint:
+
+  curl "http://<API_URL>/api/status"
+
+NEXT STEPS:
+-----------
+1. Monitor the initialization job completion
+2. Wait for the StatefulSet to become ready
+3. Test the API with sample queries
+4. Configure ingress for external access (if needed)
+{{- if .Values.monitoring.serviceMonitor.enabled }}
+5. Check Prometheus for metrics collection
+{{- end }}
+
+For more information:
+- Chart documentation: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
+- Overpass API docs: https://wiki.openstreetmap.org/wiki/Overpass_API
+- Report issues: https://github.com/l4gdev/helm-charts/issues

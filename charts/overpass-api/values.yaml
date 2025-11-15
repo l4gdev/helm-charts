@@ -1,0 +1,361 @@
+# Default values for overpass-api
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Global configuration
+global:
+  # -- Global storage class for PVC provisioning
+  storageClass: ""
+
+# -- Image configuration
+image:
+  # -- Overpass API Docker image repository
+  repository: wiktorn/overpass-api
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag (defaults to chart appVersion)
+  tag: ""
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# -- Override the name of the chart
+nameOverride: ""
+
+# -- Override the full name of the release
+fullnameOverride: ""
+
+# -- Overpass API configuration
+config:
+  # -- Operational mode: "clone" (fast, from existing instance) or "init" (from planet file)
+  mode: "clone"
+
+  # -- Metadata handling: "yes" (full history), "attic" (deleted objects), "no" (current only)
+  meta: "yes"
+
+  # -- Database compression: "no", "gz", or "lz4" (recommended)
+  compression: "lz4"
+
+  # -- Number of FastCGI processes for handling API requests
+  fastcgiProcesses: 4
+
+  # -- Rate limit: maximum concurrent connections per IP address
+  rateLimit: 2
+
+  # -- Maximum query timeout in seconds
+  maxTimeout: 1000
+
+  # -- Enable area generation (resource-intensive background process)
+  useAreas: false
+
+  # -- Area generation work/sleep ratio (1-100). Lower = less CPU usage.
+  rulesLoad: 10
+
+  # -- Seconds between diff update checks
+  updateSleep: 3600
+
+  # -- OVERPASS_TIME: Time quota for queries (time units)
+  timeQuota: ""
+
+  # -- OVERPASS_SPACE: RAM quota for queries (bytes)
+  spaceQuota: ""
+
+  # -- Planet file URL for init mode (e.g., Geofabrik extract)
+  # Example: https://download.geofabrik.de/europe/poland-latest.osm.pbf
+  planetUrl: ""
+
+  # -- Diff repository URL for updates
+  # Example: https://download.openstreetmap.fr/replication/europe/poland/minute/
+  diffUrl: ""
+
+  # -- Clone source URL for clone mode (existing Overpass instance)
+  cloneUrl: ""
+
+  # -- Preprocessing command for planet file (e.g., format conversion)
+  planetPreprocess: ""
+
+  # -- Preprocessing command for diff updates
+  diffPreprocess: ""
+
+  # -- Cookie jar contents for authenticated downloads
+  cookieJar: ""
+
+  # -- Enable OAuth cookie client for authenticated downloads
+  useOAuthCookie: false
+
+  # -- Stop container after initialization completes
+  stopAfterInit: true
+
+  # -- Allow duplicate queries from the same IP address
+  allowDuplicateQueries: false
+
+  # -- Custom health check command (shell script)
+  healthcheck: ""
+
+# -- Init job configuration
+initJob:
+  # -- Enable initialization job
+  enabled: true
+
+  # -- Init job resource requests and limits
+  resources:
+    requests:
+      cpu: 2
+      memory: 4Gi
+    limits:
+      cpu: 4
+      memory: 8Gi
+
+  # -- Node selector for init job
+  nodeSelector: {}
+
+  # -- Tolerations for init job
+  tolerations: []
+
+  # -- Affinity rules for init job
+  affinity: {}
+
+  # -- Annotations for init job pod
+  podAnnotations: {}
+
+  # -- Backoff limit for init job (retries on failure)
+  backoffLimit: 3
+
+  # -- TTL in seconds for finished init jobs
+  ttlSecondsAfterFinished: 86400
+
+# -- Resource management
+resources:
+  # -- Resource preset: "micro", "small", "medium", "large", "xlarge", or "custom"
+  # Presets automatically configure CPU, memory, and storage based on expected data size
+  preset: "medium"
+
+  # -- Custom resource requests (used when preset is "custom")
+  requests:
+    cpu: 4
+    memory: 16Gi
+
+  # -- Custom resource limits (used when preset is "custom")
+  limits:
+    cpu: 8
+    memory: 32Gi
+
+# Resource presets (do not modify)
+# micro:   Small extracts (city-level)    - 1 CPU,  2Gi RAM,  10Gi storage
+# small:   Country-level extracts         - 2 CPU,  8Gi RAM,  50Gi storage
+# medium:  Multi-country regions          - 4 CPU, 16Gi RAM, 150Gi storage
+# large:   Continental extracts           - 8 CPU, 32Gi RAM, 400Gi storage
+# xlarge:  Full planet database           -16 CPU, 64Gi RAM,   1Ti storage
+
+# -- Persistence configuration
+persistence:
+  # -- Enable persistent storage for /db directory
+  enabled: true
+
+  # -- Storage class for PVC (uses global.storageClass if empty)
+  storageClass: ""
+
+  # -- Access modes for PVC
+  accessModes:
+    - ReadWriteOnce
+
+  # -- Storage size (auto-set by resource preset, can be overridden)
+  size: ""
+
+  # -- Use existing PVC instead of creating new one
+  existingClaim: ""
+
+  # -- Annotations for PVC
+  annotations: {}
+
+# -- ServiceAccount configuration
+serviceAccount:
+  # -- Create service account
+  create: true
+
+  # -- Annotations for service account
+  annotations: {}
+
+  # -- Service account name (auto-generated if empty)
+  name: ""
+
+# -- Pod annotations
+podAnnotations: {}
+
+# -- Pod security context
+podSecurityContext:
+  fsGroup: 1000
+  runAsNonRoot: false  # Overpass container runs as root by default
+  # fsGroupChangePolicy: "OnRootMismatch"
+
+# -- Container security context
+securityContext:
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  allowPrivilegeEscalation: false
+
+# -- Service configuration
+service:
+  # -- Service type
+  type: ClusterIP
+
+  # -- Service port
+  port: 80
+
+  # -- Service annotations
+  annotations: {}
+
+  # -- Load balancer IP (for LoadBalancer type)
+  loadBalancerIP: ""
+
+  # -- Load balancer source ranges
+  loadBalancerSourceRanges: []
+
+# -- Ingress configuration
+ingress:
+  # -- Enable ingress
+  enabled: false
+
+  # -- Ingress class name
+  className: ""
+
+  # -- Ingress annotations
+  annotations: {}
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    # nginx.ingress.kubernetes.io/proxy-read-timeout: "1200"
+
+  # -- Ingress hosts configuration
+  hosts:
+    - host: overpass.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+  # -- TLS configuration
+  tls: []
+  #  - secretName: overpass-tls
+  #    hosts:
+  #      - overpass.example.com
+
+# -- Liveness probe configuration
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /api/status
+    port: http
+  initialDelaySeconds: 120
+  periodSeconds: 30
+  timeoutSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+# -- Readiness probe configuration
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /api/status
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+# -- Startup probe configuration
+startupProbe:
+  enabled: true
+  httpGet:
+    path: /api/status
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 30
+
+# -- Node selector for pod assignment
+nodeSelector: {}
+
+# -- Tolerations for pod assignment
+tolerations: []
+
+# -- Affinity rules for pod assignment
+affinity: {}
+
+# -- Topology spread constraints
+topologySpreadConstraints: []
+
+# -- Priority class name
+priorityClassName: ""
+
+# -- Termination grace period in seconds
+terminationGracePeriodSeconds: 60
+
+# -- Pod disruption budget
+podDisruptionBudget:
+  # -- Enable pod disruption budget
+  enabled: false
+
+  # -- Minimum available pods
+  minAvailable: 1
+
+  # -- Maximum unavailable pods (alternative to minAvailable)
+  # maxUnavailable: 1
+
+# -- Monitoring configuration
+monitoring:
+  # -- Enable Prometheus ServiceMonitor
+  serviceMonitor:
+    enabled: false
+
+    # -- ServiceMonitor namespace (defaults to release namespace)
+    namespace: ""
+
+    # -- ServiceMonitor labels
+    labels: {}
+
+    # -- Scrape interval
+    interval: 30s
+
+    # -- Scrape timeout
+    scrapeTimeout: 10s
+
+    # -- Metric relabelings
+    metricRelabelings: []
+
+    # -- Relabelings
+    relabelings: []
+
+# -- Extra environment variables
+extraEnv: []
+# - name: CUSTOM_VAR
+#   value: "custom-value"
+
+# -- Extra environment variables from ConfigMaps or Secrets
+extraEnvFrom: []
+# - configMapRef:
+#     name: extra-config
+# - secretRef:
+#     name: extra-secrets
+
+# -- Extra volumes
+extraVolumes: []
+# - name: custom-volume
+#   emptyDir: {}
+
+# -- Extra volume mounts
+extraVolumeMounts: []
+# - name: custom-volume
+#   mountPath: /custom-path
+
+# -- Additional labels for all resources
+commonLabels: {}
+
+# -- Update strategy for StatefulSet
+updateStrategy:
+  type: RollingUpdate

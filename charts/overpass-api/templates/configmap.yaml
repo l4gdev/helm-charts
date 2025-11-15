@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "overpass-api.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "overpass-api.labels" . | nindent 4 }}
+data:
+  # Operational mode
+  OVERPASS_MODE: {{ .Values.config.mode | quote }}
+
+  # Database configuration
+  OVERPASS_META: {{ .Values.config.meta | quote }}
+  OVERPASS_COMPRESSION: {{ .Values.config.compression | quote }}
+
+  # Performance tuning
+  OVERPASS_FASTCGI_PROCESSES: {{ .Values.config.fastcgiProcesses | quote }}
+  OVERPASS_RATE_LIMIT: {{ .Values.config.rateLimit | quote }}
+  OVERPASS_MAX_TIMEOUT: {{ .Values.config.maxTimeout | quote }}
+
+  # Background processes
+  OVERPASS_USE_AREAS: {{ .Values.config.useAreas | quote }}
+  OVERPASS_RULES_LOAD: {{ .Values.config.rulesLoad | quote }}
+
+  # Update mechanism
+  OVERPASS_UPDATE_SLEEP: {{ .Values.config.updateSleep | quote }}
+
+  {{- if .Values.config.timeQuota }}
+  OVERPASS_TIME: {{ .Values.config.timeQuota | quote }}
+  {{- end }}
+
+  {{- if .Values.config.spaceQuota }}
+  OVERPASS_SPACE: {{ .Values.config.spaceQuota | quote }}
+  {{- end }}
+
+  {{- if .Values.config.diffUrl }}
+  OVERPASS_DIFF_URL: {{ .Values.config.diffUrl | quote }}
+  {{- end }}
+
+  {{- if .Values.config.planetUrl }}
+  OVERPASS_PLANET_URL: {{ .Values.config.planetUrl | quote }}
+  {{- end }}
+
+  {{- if .Values.config.cloneUrl }}
+  OVERPASS_CLONE_SOURCE: {{ .Values.config.cloneUrl | quote }}
+  {{- end }}
+
+  {{- if .Values.config.planetPreprocess }}
+  OVERPASS_PLANET_PREPROCESS: {{ .Values.config.planetPreprocess | quote }}
+  {{- end }}
+
+  {{- if .Values.config.diffPreprocess }}
+  OVERPASS_DIFF_PREPROCESS: {{ .Values.config.diffPreprocess | quote }}
+  {{- end }}
+
+  {{- if .Values.config.cookieJar }}
+  OVERPASS_COOKIE_JAR_CONTENTS: {{ .Values.config.cookieJar | quote }}
+  {{- end }}
+
+  {{- if .Values.config.useOAuthCookie }}
+  USE_OAUTH_COOKIE_CLIENT: "yes"
+  {{- end }}
+
+  {{- if .Values.config.stopAfterInit }}
+  OVERPASS_STOP_AFTER_INIT: "true"
+  {{- end }}
+
+  {{- if .Values.config.allowDuplicateQueries }}
+  OVERPASS_ALLOW_DUPLICATE_QUERIES: "yes"
+  {{- end }}
+
+  {{- if .Values.config.healthcheck }}
+  OVERPASS_HEALTHCHECK: {{ .Values.config.healthcheck | quote }}
+  {{- end }}

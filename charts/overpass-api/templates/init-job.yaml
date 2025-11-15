@@ -1,0 +1,142 @@
+{{- if .Values.initJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "overpass-api.fullname" . }}-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "overpass-api.labels" . | nindent 4 }}
+    app.kubernetes.io/component: init
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: {{ .Values.initJob.backoffLimit }}
+  {{- if .Values.initJob.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.initJob.ttlSecondsAfterFinished }}
+  {{- end }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.initJob.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "overpass-api.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: init
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "overpass-api.serviceAccountName" . }}
+      restartPolicy: OnFailure
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        # Check if database is already initialized
+        - name: check-init
+          image: {{ include "overpass-api.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              if [ -f /db/.initialized ]; then
+                echo "Database already initialized. Skipping initialization."
+                exit 0
+              fi
+              echo "Database not initialized. Proceeding with initialization."
+          volumeMounts:
+            - name: data
+              mountPath: /db
+      containers:
+        - name: init-overpass
+          image: {{ include "overpass-api.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              # Check if already initialized
+              if [ -f /db/.initialized ]; then
+                echo "Database already initialized. Exiting."
+                exit 0
+              fi
+
+              echo "Starting Overpass API initialization in mode: ${OVERPASS_MODE}"
+
+              # Run the initialization
+              # The container will stop after initialization completes
+              # and create a marker file to indicate success
+
+              # Wait for initialization to complete
+              # The container's initialization script handles this
+              sleep infinity &
+              SLEEP_PID=$!
+
+              # Wait for the /db directory to be populated
+              while [ ! -f /db/nodes.bin ] && [ -d /proc/$SLEEP_PID ]; do
+                echo "Waiting for database initialization to complete..."
+                sleep 30
+              done
+
+              # Create marker file to indicate successful initialization
+              if [ -f /db/nodes.bin ]; then
+                echo "Database initialization completed successfully"
+                touch /db/.initialized
+                kill $SLEEP_PID 2>/dev/null || true
+                exit 0
+              else
+                echo "Database initialization failed or incomplete"
+                exit 1
+              fi
+          envFrom:
+            - configMapRef:
+                name: {{ include "overpass-api.fullname" . }}
+          {{- with .Values.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.initJob.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /db
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "overpass-api.pvcName" . }}
+        {{- else }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+      {{- with .Values.initJob.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initJob.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initJob.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

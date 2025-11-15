@@ -1,0 +1,74 @@
+# Regional extract deployment (Poland example)
+# Uses init mode to build from Geofabrik extract
+
+# Resource preset for country-level data
+resources:
+  preset: small
+
+config:
+  # Initialize from planet file
+  mode: init
+
+  # Poland extract from Geofabrik
+  planetUrl: "https://download.geofabrik.de/europe/poland-latest.osm.pbf"
+
+  # Poland-specific minutely diffs
+  diffUrl: "https://download.openstreetmap.fr/replication/europe/poland/minute/"
+
+  # Full metadata support
+  meta: "yes"
+
+  # LZ4 compression for better performance
+  compression: "lz4"
+
+  # Moderate process count
+  fastcgiProcesses: 4
+
+  # Enable area generation (moderate CPU usage)
+  useAreas: true
+  rulesLoad: 10
+
+  # Check for updates every hour
+  updateSleep: 3600
+
+# Persistence configuration
+persistence:
+  enabled: true
+  size: 50Gi  # Override default small preset size if needed
+
+# Enable ingress for external access
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1200"
+  hosts:
+    - host: overpass.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: overpass-tls
+      hosts:
+        - overpass.example.com
+
+# Enable monitoring
+monitoring:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+
+# Init job configuration
+initJob:
+  enabled: true
+  resources:
+    requests:
+      cpu: 2
+      memory: 4Gi
+    limits:
+      cpu: 4
+      memory: 8Gi
+  ttlSecondsAfterFinished: 86400  # Clean up after 24h

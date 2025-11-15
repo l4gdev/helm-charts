@@ -1,0 +1,18 @@
+# Minimal Overpass API configuration for quick start
+# This uses clone mode with default settings
+
+config:
+  # Use clone mode for faster initialization
+  mode: clone
+  # Source for cloning (official public instance)
+  cloneUrl: "https://overpass-api.de/api/"
+  # Europe minutely diffs
+  diffUrl: "https://download.openstreetmap.fr/replication/europe/minute/"
+
+# Small resource preset for testing
+resources:
+  preset: small
+
+# Enable persistence with default storage
+persistence:
+  enabled: true

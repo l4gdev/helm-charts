@@ -1,0 +1,40 @@
+apiVersion: v2
+name: overpass-api
+description: A Helm chart for deploying Overpass API - OpenStreetMap query service
+icon: https://wiki.openstreetmap.org/w/images/b/b5/Overpass_API_logo.svg
+home: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
+sources:
+  - https://github.com/wiktorn/Overpass-API
+  - https://github.com/drolbr/Overpass-API
+  - https://github.com/l4gdev/helm-charts
+keywords:
+  - openstreetmap
+  - osm
+  - overpass
+  - geospatial
+  - mapping
+  - api
+maintainers:
+  - name: L4G
+    email: contact@l4g.dev
+type: application
+version: 0.1.0
+appVersion: "latest"
+annotations:
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/license: AGPL-3.0
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
+    - name: Overpass API Documentation
+      url: https://wiki.openstreetmap.org/wiki/Overpass_API
+    - name: Docker Image
+      url: https://github.com/wiktorn/Overpass-API
+    - name: Upstream Project
+      url: https://github.com/drolbr/Overpass-API
+  artifacthub.io/operator: "false"
+  artifacthub.io/prerelease: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release of Overpass API Helm chart
