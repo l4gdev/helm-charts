@@ -3,14 +3,14 @@ entries:
   freescout:
   - apiVersion: v2
     appVersion: php8.2-1.17.72
-    created: "2025-11-15T20:45:13.346001736Z"
+    created: "2025-11-15T21:34:06.558815459Z"
     dependencies:
     - condition: mariadb.enabled
       name: mariadb
       repository: https://charts.bitnami.com/bitnami
       version: ~11.x
     description: A Helm chart for Kubernetes
-    digest: 0f849fb19a9f25d6c8c0189909c3edaf25d1bec9fc662af077fd19529c0bae88
+    digest: ecc5c5d2886242821763e6954d8f134c692b0df2e461bb0eb2796e6d526f29bd
     icon: https://freescout.net/apple-touch-icon.png
     maintainers:
     - email: contact@l4g.dev
@@ -41,9 +41,9 @@ entries:
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: latest
-    created: "2025-11-15T20:45:13.34705061Z"
+    created: "2025-11-15T21:34:06.560721646Z"
     description: A Helm chart for deploying Overpass API - OpenStreetMap query service
-    digest: 6998a65d6440eaebc8a507fd6ec1a455dd63812eeeac6c1a969ef16db858c3e8
+    digest: 7112f3987e63ebd36d3a4f2f988ff2d674752a5e9b4e71a8b1d3b8d70255ce4f
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
     icon: https://wiki.openstreetmap.org/w/images/b/b5/Overpass_API_logo.svg
     keywords:
@@ -65,4 +65,4 @@ entries:
     urls:
     - https://l4gdev.github.io/helm-charts/charts/overpass-api-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-15T20:45:13.341417431Z"
+generated: "2025-11-15T21:34:06.554183501Z"
