@@ -63,6 +63,34 @@ helm install overpass l4gdev/overpass-api \
   --set ingress.hosts[0].paths[0].pathType=Prefix
 ```
 
+### Two-Phase Deployment with Init Job
+
+The chart uses a two-phase deployment to prevent PVC multi-attach errors during initialization:
+
+**Phase 1: Initialize the database**
+```bash
+helm install overpass l4gdev/overpass-api \
+  --set initJob.enabled=true \
+  --set config.mode=init \
+  --set config.planetUrl=https://download.geofabrik.de/europe/luxembourg-latest.osm.bz2
+```
+
+Wait for the init job to complete (this may take 10-60 minutes depending on data size). Monitor progress:
+```bash
+kubectl logs -f job/overpass-init
+```
+
+**Phase 2: Start the API service**
+
+Once initialization completes, upgrade the release to start the StatefulSet:
+```bash
+helm upgrade overpass l4gdev/overpass-api \
+  --set initJob.enabled=false \
+  --reuse-values
+```
+
+The API service will now start and serve queries using the initialized database.
+
 ## Configuration
 
 ### Resource Presets

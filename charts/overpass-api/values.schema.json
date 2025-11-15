@@ -1,0 +1,296 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "properties": {
+        "storageClass": {
+          "type": "string",
+          "description": "Global storage class for PVC provisioning"
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "description": "Overpass API Docker image repository"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"],
+          "description": "Image pull policy"
+        },
+        "tag": {
+          "type": "string",
+          "description": "Overrides the image tag (defaults to chart appVersion)"
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["clone", "init"],
+          "description": "Operational mode: clone (fast, from existing instance) or init (from planet file)"
+        },
+        "meta": {
+          "type": "string",
+          "enum": ["yes", "attic", "no"],
+          "description": "Metadata handling: yes (full history), attic (deleted objects), no (current only)"
+        },
+        "compression": {
+          "type": "string",
+          "enum": ["no", "gz", "lz4"],
+          "description": "Database compression algorithm"
+        },
+        "fastcgiProcesses": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of FastCGI processes for handling API requests"
+        },
+        "rateLimit": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Rate limit: maximum concurrent connections per IP address"
+        },
+        "maxTimeout": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum query timeout in seconds"
+        },
+        "useAreas": {
+          "type": "boolean",
+          "description": "Enable area generation (resource-intensive background process)"
+        },
+        "rulesLoad": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Area generation work/sleep ratio"
+        },
+        "updateSleep": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Seconds between diff update checks"
+        },
+        "timeQuota": {
+          "type": "string",
+          "description": "Time quota for queries"
+        },
+        "spaceQuota": {
+          "type": "string",
+          "description": "RAM quota for queries (bytes)"
+        },
+        "planetUrl": {
+          "type": "string",
+          "description": "Planet file URL for init mode"
+        },
+        "diffUrl": {
+          "type": "string",
+          "description": "Diff repository URL for updates"
+        },
+        "cloneUrl": {
+          "type": "string",
+          "description": "Clone source URL for clone mode"
+        },
+        "planetPreprocess": {
+          "type": "string",
+          "description": "Preprocessing command for planet file"
+        },
+        "diffPreprocess": {
+          "type": "string",
+          "description": "Preprocessing command for diff updates"
+        },
+        "cookieJar": {
+          "type": "string",
+          "description": "Cookie jar contents for authenticated downloads"
+        },
+        "useOAuthCookie": {
+          "type": "boolean",
+          "description": "Enable OAuth cookie client for authenticated downloads"
+        },
+        "stopAfterInit": {
+          "type": "boolean",
+          "description": "Stop container after initialization completes"
+        },
+        "allowDuplicateQueries": {
+          "type": "boolean",
+          "description": "Allow duplicate queries from the same IP address"
+        },
+        "healthcheck": {
+          "type": "string",
+          "description": "Custom health check command"
+        }
+      }
+    },
+    "initJob": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable initialization job"
+        },
+        "resources": {
+          "type": "object",
+          "description": "Init job resource requests and limits"
+        },
+        "backoffLimit": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Backoff limit for init job (retries on failure)"
+        },
+        "ttlSecondsAfterFinished": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "TTL in seconds for finished init jobs"
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "preset": {
+          "type": "string",
+          "enum": ["micro", "small", "medium", "large", "xlarge", "custom"],
+          "description": "Resource preset based on expected data size"
+        },
+        "requests": {
+          "type": "object",
+          "description": "Custom resource requests (used when preset is custom)"
+        },
+        "limits": {
+          "type": "object",
+          "description": "Custom resource limits (used when preset is custom)"
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable persistent storage for /db directory"
+        },
+        "storageClass": {
+          "type": "string",
+          "description": "Storage class for PVC (uses global.storageClass if empty)"
+        },
+        "accessModes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["ReadWriteOnce", "ReadOnlyMany", "ReadWriteMany"]
+          },
+          "description": "Access modes for PVC"
+        },
+        "size": {
+          "type": "string",
+          "description": "Storage size (auto-set by resource preset, can be overridden)"
+        },
+        "existingClaim": {
+          "type": "string",
+          "description": "Use existing PVC instead of creating new one"
+        }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "description": "Create service account"
+        },
+        "name": {
+          "type": "string",
+          "description": "Service account name (auto-generated if empty)"
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"],
+          "description": "Service type"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Service port"
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable ingress"
+        },
+        "className": {
+          "type": "string",
+          "description": "Ingress class name"
+        },
+        "hosts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "Hostname"
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "description": "Path"
+                    },
+                    "pathType": {
+                      "type": "string",
+                      "enum": ["Prefix", "Exact", "ImplementationSpecific"],
+                      "description": "Path type"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "monitoring": {
+      "type": "object",
+      "properties": {
+        "serviceMonitor": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable Prometheus ServiceMonitor"
+            },
+            "interval": {
+              "type": "string",
+              "pattern": "^[0-9]+(ms|s|m|h)$",
+              "description": "Scrape interval"
+            },
+            "scrapeTimeout": {
+              "type": "string",
+              "pattern": "^[0-9]+(ms|s|m|h)$",
+              "description": "Scrape timeout"
+            }
+          }
+        }
+      }
+    }
+  }
+}
