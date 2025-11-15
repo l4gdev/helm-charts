@@ -3,14 +3,14 @@ entries:
   freescout:
   - apiVersion: v2
     appVersion: php8.2-1.17.72
-    created: "2025-01-20T01:19:25.606527596Z"
+    created: "2025-11-15T20:45:13.346001736Z"
     dependencies:
     - condition: mariadb.enabled
       name: mariadb
       repository: https://charts.bitnami.com/bitnami
       version: ~11.x
     description: A Helm chart for Kubernetes
-    digest: e89645901edcdc388d3744a667296d42c000e9aa448d1edc243c8cc8a8a4ec98
+    digest: 0f849fb19a9f25d6c8c0189909c3edaf25d1bec9fc662af077fd19529c0bae88
     icon: https://freescout.net/apple-touch-icon.png
     maintainers:
     - email: contact@l4g.dev
@@ -20,4 +20,49 @@ entries:
     urls:
     - https://l4gdev.github.io/helm-charts/charts/freescout-0.1.0.tgz
     version: 0.1.0
-generated: "2025-01-20T01:19:25.601845214Z"
+  overpass-api:
+  - annotations:
+      artifacthub.io/category: integration-delivery
+      artifacthub.io/changes: |
+        - kind: added
+          description: Initial release of Overpass API Helm chart
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/license: AGPL-3.0
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
+        - name: Overpass API Documentation
+          url: https://wiki.openstreetmap.org/wiki/Overpass_API
+        - name: Docker Image
+          url: https://github.com/wiktorn/Overpass-API
+        - name: Upstream Project
+          url: https://github.com/drolbr/Overpass-API
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: latest
+    created: "2025-11-15T20:45:13.34705061Z"
+    description: A Helm chart for deploying Overpass API - OpenStreetMap query service
+    digest: 6998a65d6440eaebc8a507fd6ec1a455dd63812eeeac6c1a969ef16db858c3e8
+    home: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
+    icon: https://wiki.openstreetmap.org/w/images/b/b5/Overpass_API_logo.svg
+    keywords:
+    - openstreetmap
+    - osm
+    - overpass
+    - geospatial
+    - mapping
+    - api
+    maintainers:
+    - email: contact@l4g.dev
+      name: L4G
+    name: overpass-api
+    sources:
+    - https://github.com/wiktorn/Overpass-API
+    - https://github.com/drolbr/Overpass-API
+    - https://github.com/l4gdev/helm-charts
+    type: application
+    urls:
+    - https://l4gdev.github.io/helm-charts/charts/overpass-api-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-11-15T20:45:13.341417431Z"
