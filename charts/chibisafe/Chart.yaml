@@ -1,0 +1,37 @@
+apiVersion: v2
+name: chibisafe
+description: A Helm chart for Chibisafe - blazing fast file vault and sharing platform
+icon: https://chibisafe.app/logo.png
+home: https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe
+sources:
+  - https://github.com/chibisafe/chibisafe
+  - https://github.com/l4gdev/helm-charts
+keywords:
+  - chibisafe
+  - file-upload
+  - file-sharing
+  - storage
+  - media
+  - self-hosted
+maintainers:
+  - name: L4G
+    email: contact@l4g.dev
+type: application
+version: 0.1.0
+appVersion: "latest"
+annotations:
+  artifacthub.io/category: storage
+  artifacthub.io/license: MIT
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe
+    - name: Chibisafe Documentation
+      url: https://chibisafe.app/docs
+    - name: Chibisafe GitHub
+      url: https://github.com/chibisafe/chibisafe
+  artifacthub.io/operator: "false"
+  artifacthub.io/prerelease: "false"
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release of Chibisafe Helm chart

@@ -1,0 +1,362 @@
+# Default values for chibisafe
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- Global configuration
+global:
+  # -- Global storage class for PVC provisioning
+  storageClass: ""
+
+# -- Override the name of the chart
+nameOverride: ""
+
+# -- Override the full name of the release
+fullnameOverride: ""
+
+# -- Additional labels for all resources
+commonLabels: {}
+
+# -- Additional annotations for all resources
+commonAnnotations: {}
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# =============================================================================
+# FRONTEND CONFIGURATION (chibisafe/chibisafe)
+# =============================================================================
+frontend:
+  # -- Frontend image configuration
+  image:
+    # -- Frontend image repository
+    repository: chibisafe/chibisafe
+    # -- Frontend image tag (defaults to "latest")
+    tag: "latest"
+    # -- Frontend image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- Frontend container resource requests and limits
+  resources: {}
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # limits:
+    #   cpu: 500m
+    #   memory: 512Mi
+
+  # -- Additional environment variables for frontend container
+  env: []
+    # - name: CUSTOM_VAR
+    #   value: "custom-value"
+
+  # -- Additional environment variables from ConfigMaps or Secrets for frontend
+  envFrom: []
+    # - configMapRef:
+    #     name: extra-config
+    # - secretRef:
+    #     name: extra-secrets
+
+  # -- Additional volume mounts for frontend container
+  extraVolumeMounts: []
+    # - name: custom-volume
+    #   mountPath: /custom-path
+
+  # -- Security context for frontend container
+  securityContext: {}
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # allowPrivilegeEscalation: false
+
+# =============================================================================
+# BACKEND CONFIGURATION (chibisafe/chibisafe-server)
+# =============================================================================
+backend:
+  # -- Backend image configuration
+  image:
+    # -- Backend image repository
+    repository: chibisafe/chibisafe-server
+    # -- Backend image tag (defaults to "latest")
+    tag: "latest"
+    # -- Backend image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- Backend container resource requests and limits
+  resources: {}
+    # requests:
+    #   cpu: 200m
+    #   memory: 256Mi
+    # limits:
+    #   cpu: 1000m
+    #   memory: 1Gi
+
+  # -- Additional environment variables for backend container
+  env: []
+    # - name: ADMIN_PASSWORD
+    #   value: "secure-password"
+
+  # -- Additional environment variables from ConfigMaps or Secrets for backend
+  envFrom: []
+    # - secretRef:
+    #     name: chibisafe-secrets
+
+  # -- Additional volume mounts for backend container
+  extraVolumeMounts: []
+    # - name: custom-volume
+    #   mountPath: /custom-path
+
+  # -- Security context for backend container
+  securityContext: {}
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # allowPrivilegeEscalation: false
+
+# =============================================================================
+# CADDY CONFIGURATION (internal reverse proxy)
+# =============================================================================
+caddy:
+  # -- Caddy image configuration
+  image:
+    # -- Caddy image repository
+    repository: caddy
+    # -- Caddy image tag
+    tag: "2-alpine"
+    # -- Caddy image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- Caddy container resource requests and limits
+  resources: {}
+    # requests:
+    #   cpu: 50m
+    #   memory: 64Mi
+    # limits:
+    #   cpu: 200m
+    #   memory: 128Mi
+
+  # -- Additional environment variables for Caddy container
+  env: []
+
+  # -- Additional volume mounts for Caddy container
+  extraVolumeMounts: []
+
+  # -- Security context for Caddy container
+  securityContext: {}
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # allowPrivilegeEscalation: false
+
+# =============================================================================
+# PERSISTENCE CONFIGURATION
+# =============================================================================
+persistence:
+  # -- Database persistence (SQLite database files)
+  database:
+    # -- Enable database persistence
+    enabled: true
+    # -- Storage class for database PVC (uses global.storageClass if empty)
+    storageClass: ""
+    # -- Access modes for database PVC
+    accessModes:
+      - ReadWriteOnce
+    # -- Storage size for database
+    size: 1Gi
+    # -- Use existing PVC instead of creating new one
+    existingClaim: ""
+    # -- Annotations for database PVC
+    annotations: {}
+
+  # -- Uploads persistence (user uploaded files)
+  uploads:
+    # -- Enable uploads persistence
+    enabled: true
+    # -- Storage class for uploads PVC (uses global.storageClass if empty)
+    storageClass: ""
+    # -- Access modes for uploads PVC
+    accessModes:
+      - ReadWriteOnce
+    # -- Storage size for uploads (adjust based on expected usage)
+    size: 10Gi
+    # -- Use existing PVC instead of creating new one
+    existingClaim: ""
+    # -- Annotations for uploads PVC
+    annotations: {}
+
+  # -- Logs persistence (application logs)
+  logs:
+    # -- Enable logs persistence
+    enabled: false
+    # -- Storage class for logs PVC (uses global.storageClass if empty)
+    storageClass: ""
+    # -- Access modes for logs PVC
+    accessModes:
+      - ReadWriteOnce
+    # -- Storage size for logs
+    size: 1Gi
+    # -- Use existing PVC instead of creating new one
+    existingClaim: ""
+    # -- Annotations for logs PVC
+    annotations: {}
+
+# =============================================================================
+# POD CONFIGURATION
+# =============================================================================
+# -- Annotations for pods
+podAnnotations: {}
+
+# -- Labels for pods
+podLabels: {}
+
+# -- Pod security context
+podSecurityContext:
+  fsGroup: 1000
+  # runAsNonRoot: true
+  # fsGroupChangePolicy: "OnRootMismatch"
+
+# -- Node selector for pod assignment
+nodeSelector: {}
+
+# -- Tolerations for pod assignment
+tolerations: []
+
+# -- Affinity rules for pod assignment
+affinity: {}
+
+# -- Topology spread constraints
+topologySpreadConstraints: []
+
+# -- Priority class name
+priorityClassName: ""
+
+# -- Termination grace period in seconds
+terminationGracePeriodSeconds: 30
+
+# -- Extra volumes to add to the pod
+extraVolumes: []
+  # - name: custom-volume
+  #   emptyDir: {}
+  # - name: config-volume
+  #   configMap:
+  #     name: my-config
+
+# =============================================================================
+# SERVICE CONFIGURATION
+# =============================================================================
+service:
+  # -- Service type
+  type: ClusterIP
+  # -- Service port (Caddy serves on port 80 internally)
+  port: 80
+  # -- Service annotations
+  annotations: {}
+  # -- Load balancer IP (for LoadBalancer type)
+  loadBalancerIP: ""
+  # -- Load balancer source ranges
+  loadBalancerSourceRanges: []
+
+# =============================================================================
+# INGRESS CONFIGURATION
+# =============================================================================
+ingress:
+  # -- Enable ingress
+  enabled: false
+  # -- Ingress class name
+  className: ""
+  # -- Ingress annotations
+  annotations: {}
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  # -- Ingress hosts configuration
+  hosts:
+    - host: chibisafe.local
+      paths:
+        - path: /
+          pathType: Prefix
+  # -- TLS configuration
+  tls: []
+    # - secretName: chibisafe-tls
+    #   hosts:
+    #     - chibisafe.local
+
+# =============================================================================
+# NETWORK POLICY CONFIGURATION
+# =============================================================================
+networkPolicy:
+  # -- Enable network policy
+  enabled: true
+  # -- Additional ingress rules
+  additionalIngressRules: []
+  # -- Additional egress rules
+  additionalEgressRules: []
+
+# =============================================================================
+# POD DISRUPTION BUDGET CONFIGURATION
+# =============================================================================
+podDisruptionBudget:
+  # -- Enable pod disruption budget
+  enabled: true
+  # -- Minimum available pods
+  minAvailable: 1
+  # -- Maximum unavailable pods (alternative to minAvailable)
+  # maxUnavailable: 1
+
+# =============================================================================
+# SERVICE ACCOUNT CONFIGURATION
+# =============================================================================
+serviceAccount:
+  # -- Create service account
+  create: true
+  # -- Annotations for service account
+  annotations: {}
+  # -- Service account name (auto-generated if empty)
+  name: ""
+
+# =============================================================================
+# HEALTH PROBES CONFIGURATION
+# =============================================================================
+# -- Liveness probe configuration
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+# -- Readiness probe configuration
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+# -- Startup probe configuration
+startupProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 30
+
+# =============================================================================
+# DEPLOYMENT STRATEGY
+# =============================================================================
+# -- Update strategy for deployment
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+# -- Number of replicas (note: with RWO PVCs, only 1 replica is supported)
+replicaCount: 1

@@ -1,0 +1,427 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "Chibisafe Helm Chart Values",
+  "description": "Configuration values for the Chibisafe Helm chart",
+  "properties": {
+    "global": {
+      "type": "object",
+      "description": "Global configuration",
+      "properties": {
+        "storageClass": {
+          "type": "string",
+          "description": "Global storage class for PVC provisioning"
+        }
+      }
+    },
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the name of the chart"
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "Override the full name of the release"
+    },
+    "commonLabels": {
+      "type": "object",
+      "description": "Additional labels for all resources"
+    },
+    "commonAnnotations": {
+      "type": "object",
+      "description": "Additional annotations for all resources"
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "description": "Image pull secrets for private registries",
+      "items": {
+        "type": "object"
+      }
+    },
+    "replicaCount": {
+      "type": "integer",
+      "description": "Number of replicas",
+      "minimum": 1,
+      "default": 1
+    },
+    "frontend": {
+      "type": "object",
+      "description": "Frontend container configuration",
+      "properties": {
+        "image": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string",
+              "description": "Frontend image repository",
+              "default": "chibisafe/chibisafe"
+            },
+            "tag": {
+              "type": "string",
+              "description": "Frontend image tag",
+              "default": "latest"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "description": "Image pull policy",
+              "enum": ["Always", "IfNotPresent", "Never"],
+              "default": "IfNotPresent"
+            }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "description": "Resource requests and limits"
+        },
+        "env": {
+          "type": "array",
+          "description": "Additional environment variables"
+        },
+        "envFrom": {
+          "type": "array",
+          "description": "Environment variables from ConfigMaps or Secrets"
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "description": "Additional volume mounts"
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Container security context"
+        }
+      }
+    },
+    "backend": {
+      "type": "object",
+      "description": "Backend container configuration",
+      "properties": {
+        "image": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string",
+              "description": "Backend image repository",
+              "default": "chibisafe/chibisafe-server"
+            },
+            "tag": {
+              "type": "string",
+              "description": "Backend image tag",
+              "default": "latest"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "description": "Image pull policy",
+              "enum": ["Always", "IfNotPresent", "Never"],
+              "default": "IfNotPresent"
+            }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "description": "Resource requests and limits"
+        },
+        "env": {
+          "type": "array",
+          "description": "Additional environment variables"
+        },
+        "envFrom": {
+          "type": "array",
+          "description": "Environment variables from ConfigMaps or Secrets"
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "description": "Additional volume mounts"
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Container security context"
+        }
+      }
+    },
+    "caddy": {
+      "type": "object",
+      "description": "Caddy reverse proxy configuration",
+      "properties": {
+        "image": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string",
+              "description": "Caddy image repository",
+              "default": "caddy"
+            },
+            "tag": {
+              "type": "string",
+              "description": "Caddy image tag",
+              "default": "2-alpine"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "description": "Image pull policy",
+              "enum": ["Always", "IfNotPresent", "Never"],
+              "default": "IfNotPresent"
+            }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "description": "Resource requests and limits"
+        },
+        "env": {
+          "type": "array",
+          "description": "Additional environment variables"
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "description": "Additional volume mounts"
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Container security context"
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "description": "Persistence configuration",
+      "properties": {
+        "database": {
+          "type": "object",
+          "description": "Database persistence (SQLite)",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable database persistence",
+              "default": true
+            },
+            "storageClass": {
+              "type": "string",
+              "description": "Storage class for PVC"
+            },
+            "accessModes": {
+              "type": "array",
+              "description": "Access modes for PVC",
+              "items": {
+                "type": "string"
+              }
+            },
+            "size": {
+              "type": "string",
+              "description": "Storage size",
+              "default": "1Gi"
+            },
+            "existingClaim": {
+              "type": "string",
+              "description": "Use existing PVC"
+            },
+            "annotations": {
+              "type": "object",
+              "description": "PVC annotations"
+            }
+          }
+        },
+        "uploads": {
+          "type": "object",
+          "description": "Uploads persistence",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable uploads persistence",
+              "default": true
+            },
+            "storageClass": {
+              "type": "string",
+              "description": "Storage class for PVC"
+            },
+            "accessModes": {
+              "type": "array",
+              "description": "Access modes for PVC",
+              "items": {
+                "type": "string"
+              }
+            },
+            "size": {
+              "type": "string",
+              "description": "Storage size",
+              "default": "10Gi"
+            },
+            "existingClaim": {
+              "type": "string",
+              "description": "Use existing PVC"
+            },
+            "annotations": {
+              "type": "object",
+              "description": "PVC annotations"
+            }
+          }
+        },
+        "logs": {
+          "type": "object",
+          "description": "Logs persistence",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable logs persistence",
+              "default": false
+            },
+            "storageClass": {
+              "type": "string",
+              "description": "Storage class for PVC"
+            },
+            "accessModes": {
+              "type": "array",
+              "description": "Access modes for PVC",
+              "items": {
+                "type": "string"
+              }
+            },
+            "size": {
+              "type": "string",
+              "description": "Storage size",
+              "default": "1Gi"
+            },
+            "existingClaim": {
+              "type": "string",
+              "description": "Use existing PVC"
+            },
+            "annotations": {
+              "type": "object",
+              "description": "PVC annotations"
+            }
+          }
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "description": "Service configuration",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Service type",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"],
+          "default": "ClusterIP"
+        },
+        "port": {
+          "type": "integer",
+          "description": "Service port",
+          "default": 80
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Service annotations"
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "description": "Ingress configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable ingress",
+          "default": false
+        },
+        "className": {
+          "type": "string",
+          "description": "Ingress class name"
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Ingress annotations"
+        },
+        "hosts": {
+          "type": "array",
+          "description": "Ingress hosts configuration",
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "Hostname"
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "pathType": {
+                      "type": "string",
+                      "enum": ["Prefix", "Exact", "ImplementationSpecific"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tls": {
+          "type": "array",
+          "description": "TLS configuration",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "networkPolicy": {
+      "type": "object",
+      "description": "Network policy configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable network policy",
+          "default": true
+        },
+        "additionalIngressRules": {
+          "type": "array",
+          "description": "Additional ingress rules"
+        },
+        "additionalEgressRules": {
+          "type": "array",
+          "description": "Additional egress rules"
+        }
+      }
+    },
+    "podDisruptionBudget": {
+      "type": "object",
+      "description": "Pod disruption budget configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable PDB",
+          "default": true
+        },
+        "minAvailable": {
+          "type": "integer",
+          "description": "Minimum available pods"
+        },
+        "maxUnavailable": {
+          "type": "integer",
+          "description": "Maximum unavailable pods"
+        }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "description": "Service account configuration",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "description": "Create service account",
+          "default": true
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Service account annotations"
+        },
+        "name": {
+          "type": "string",
+          "description": "Service account name"
+        }
+      }
+    }
+  }
+}

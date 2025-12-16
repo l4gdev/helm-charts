@@ -4,7 +4,10 @@ A collection of production-ready Helm charts for deploying various applications 
 
 ## Available Charts
 
-- **[overpass-api](charts/overpass-api)** - Helm chart for deploying Overpass API, a powerful read-only API for querying OpenStreetMap data
+| Chart | Description |
+|-------|-------------|
+| **[chibisafe](charts/chibisafe)** | Blazing fast file vault and sharing platform for self-hosted file uploads |
+| **[overpass-api](charts/overpass-api)** | Powerful read-only API for querying OpenStreetMap data |
 
 ## Usage
 
@@ -18,11 +21,14 @@ helm repo update
 ### Install a Chart
 
 ```bash
+# Install Chibisafe
+helm install chibisafe l4gdev/chibisafe
+
 # Install Overpass API
 helm install overpass l4gdev/overpass-api
 
 # Install with custom values
-helm install overpass l4gdev/overpass-api -f custom-values.yaml
+helm install myrelease l4gdev/<chart-name> -f custom-values.yaml
 ```
 
 ### Search Available Charts

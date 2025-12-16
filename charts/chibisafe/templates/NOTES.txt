@@ -1,0 +1,114 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                              CHIBISAFE                                        ║
+║                     Blazing fast file vault                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named: {{ .Release.Name }}
+Chart version: {{ .Chart.Version }}
+App version: {{ .Chart.AppVersion }}
+
+───────────────────────────────────────────────────────────────────────────────
+ ACCESSING CHIBISAFE
+───────────────────────────────────────────────────────────────────────────────
+
+{{- if .Values.ingress.enabled }}
+Chibisafe is available at:
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+Get the application URL by running:
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "chibisafe.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+Get the application URL by running:
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+  You can watch the status with: kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "chibisafe.fullname" . }}
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "chibisafe.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+Access Chibisafe by running:
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "chibisafe.fullname" . }} 8080:{{ .Values.service.port }}
+
+Then open: http://localhost:8080
+{{- end }}
+
+───────────────────────────────────────────────────────────────────────────────
+ IMPORTANT: DEFAULT CREDENTIALS
+───────────────────────────────────────────────────────────────────────────────
+
+⚠️  The default credentials are:
+    Username: admin
+    Password: admin
+
+🔐 CHANGE THESE IMMEDIATELY after first login!
+
+Go to Dashboard → Settings → Account to update your password.
+
+───────────────────────────────────────────────────────────────────────────────
+ PERSISTENCE
+───────────────────────────────────────────────────────────────────────────────
+
+{{- if .Values.persistence.database.enabled }}
+✓ Database persistence is ENABLED
+  PVC: {{ include "chibisafe.databasePvcName" . }}
+  Size: {{ .Values.persistence.database.size }}
+{{- else }}
+✗ Database persistence is DISABLED - data will be lost on pod restart!
+{{- end }}
+
+{{- if .Values.persistence.uploads.enabled }}
+✓ Uploads persistence is ENABLED
+  PVC: {{ include "chibisafe.uploadsPvcName" . }}
+  Size: {{ .Values.persistence.uploads.size }}
+{{- else }}
+✗ Uploads persistence is DISABLED - uploaded files will be lost on pod restart!
+{{- end }}
+
+{{- if .Values.persistence.logs.enabled }}
+✓ Logs persistence is ENABLED
+  PVC: {{ include "chibisafe.logsPvcName" . }}
+  Size: {{ .Values.persistence.logs.size }}
+{{- end }}
+
+───────────────────────────────────────────────────────────────────────────────
+ CONFIGURATION
+───────────────────────────────────────────────────────────────────────────────
+
+Most Chibisafe settings can be configured through the web dashboard:
+  Dashboard → Settings
+
+This includes:
+  • Site name and branding
+  • Upload limits and file types
+  • User registration settings
+  • S3/Object storage configuration
+  • Rate limiting
+
+───────────────────────────────────────────────────────────────────────────────
+ USEFUL COMMANDS
+───────────────────────────────────────────────────────────────────────────────
+
+View logs:
+  kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "chibisafe.name" . }} -c backend
+  kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "chibisafe.name" . }} -c frontend
+  kubectl logs -f -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "chibisafe.name" . }} -c caddy
+
+Check pod status:
+  kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "chibisafe.name" . }}
+
+───────────────────────────────────────────────────────────────────────────────
+ DOCUMENTATION
+───────────────────────────────────────────────────────────────────────────────
+
+• Chibisafe Docs: https://chibisafe.app/docs
+• GitHub: https://github.com/chibisafe/chibisafe
+• Chart Source: https://github.com/l4gdev/helm-charts
+
+Happy uploading! 🚀

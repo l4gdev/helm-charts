@@ -1,0 +1,62 @@
+{{- if and .Values.persistence.database.enabled (not .Values.persistence.database.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "chibisafe.databasePvcName" . }}
+  labels:
+    {{- include "chibisafe.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+  {{- with .Values.persistence.database.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .Values.persistence.database.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.database.size }}
+  {{- include "chibisafe.storageClass" (dict "persistence" .Values.persistence.database "global" .Values.global) | nindent 2 }}
+---
+{{- end }}
+{{- if and .Values.persistence.uploads.enabled (not .Values.persistence.uploads.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "chibisafe.uploadsPvcName" . }}
+  labels:
+    {{- include "chibisafe.labels" . | nindent 4 }}
+    app.kubernetes.io/component: uploads
+  {{- with .Values.persistence.uploads.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .Values.persistence.uploads.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.uploads.size }}
+  {{- include "chibisafe.storageClass" (dict "persistence" .Values.persistence.uploads "global" .Values.global) | nindent 2 }}
+---
+{{- end }}
+{{- if and .Values.persistence.logs.enabled (not .Values.persistence.logs.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "chibisafe.logsPvcName" . }}
+  labels:
+    {{- include "chibisafe.labels" . | nindent 4 }}
+    app.kubernetes.io/component: logs
+  {{- with .Values.persistence.logs.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml .Values.persistence.logs.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.logs.size }}
+  {{- include "chibisafe.storageClass" (dict "persistence" .Values.persistence.logs "global" .Values.global) | nindent 2 }}
+{{- end }}
