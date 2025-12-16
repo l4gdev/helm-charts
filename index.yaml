@@ -1,16 +1,59 @@
 apiVersion: v1
 entries:
+  chibisafe:
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: added
+          description: Initial release of Chibisafe Helm chart
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe
+        - name: Chibisafe Documentation
+          url: https://chibisafe.app/docs
+        - name: Chibisafe GitHub
+          url: https://github.com/chibisafe/chibisafe
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: latest
+    created: "2025-12-16T01:12:31.926036454Z"
+    description: A Helm chart for Chibisafe - blazing fast file vault and sharing
+      platform
+    digest: 02079415b78b7857e7a02fae86ebc393d61bf38b4aee86f6154fb665ead6855b
+    home: https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe
+    icon: https://chibisafe.app/logo.png
+    keywords:
+    - chibisafe
+    - file-upload
+    - file-sharing
+    - storage
+    - media
+    - self-hosted
+    maintainers:
+    - email: contact@l4g.dev
+      name: L4G
+    name: chibisafe
+    sources:
+    - https://github.com/chibisafe/chibisafe
+    - https://github.com/l4gdev/helm-charts
+    type: application
+    urls:
+    - https://l4gdev.github.io/helm-charts/charts/chibisafe-0.1.0.tgz
+    version: 0.1.0
   freescout:
   - apiVersion: v2
     appVersion: php8.2-1.17.72
-    created: "2025-11-15T22:19:36.4703158Z"
+    created: "2025-12-16T01:12:31.931977985Z"
     dependencies:
     - condition: mariadb.enabled
       name: mariadb
       repository: https://charts.bitnami.com/bitnami
       version: ~11.x
     description: A Helm chart for Kubernetes
-    digest: dbb2eeaabef372f7bbcf0969ff4c6755a97c9e304944a0a9bb1073f24ae3f01d
+    digest: 81258b75cdc8b11ed7a9275e73e9e1ac8410781adb22eb2dc12db79f273f6e3e
     icon: https://freescout.net/apple-touch-icon.png
     maintainers:
     - email: contact@l4g.dev
@@ -43,9 +86,9 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2025-11-15T22:19:36.471432661Z"
+    created: "2025-12-16T01:12:31.93368015Z"
     description: A Helm chart for deploying Overpass API - OpenStreetMap query service
-    digest: 455e5a3b99e6859a29f906a89e680e159eaa632b71fe2bfde6ea9d8e69bf3104
+    digest: ea34250a0503d7a6236384b44185ff94d2250d1045a7310818dd8e2ef2c05312
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
     icon: https://wiki.openstreetmap.org/w/images/b/b5/Overpass_API_logo.svg
     keywords:
@@ -161,4 +204,4 @@ entries:
     urls:
     - https://l4gdev.github.io/helm-charts/charts/overpass-api-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-15T22:19:36.466183211Z"
+generated: "2025-12-16T01:12:31.923346376Z"
