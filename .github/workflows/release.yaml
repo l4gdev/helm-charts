@@ -30,12 +30,17 @@ jobs:
 
       - name: Add Artifact Hub repository metadata
         run: |
+          # Save file from main branch before switching
+          cp artifacthub-repo.yml /tmp/artifacthub-repo.yml
+
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
           git fetch origin gh-pages
           git checkout gh-pages
-          cp $GITHUB_WORKSPACE/artifacthub-repo.yml ./artifacthub-repo.yml 2>/dev/null || true
-          git checkout main -- artifacthub-repo.yml
+
+          # Copy the file from temp location
+          cp /tmp/artifacthub-repo.yml ./artifacthub-repo.yml
+
           git add artifacthub-repo.yml
           git diff --staged --quiet || git commit -m "Update Artifact Hub repository metadata"
           git push origin gh-pages
