@@ -13,9 +13,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-     
-      - uses: actions/checkout@v2
-     
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Publish Helm chart
         uses: stefanprodan/helm-gh-pages@master
         with:
@@ -26,3 +27,15 @@ jobs:
           branch: gh-pages
           target_dir: charts
           index_dir: .
+
+      - name: Add Artifact Hub repository metadata
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git fetch origin gh-pages
+          git checkout gh-pages
+          cp $GITHUB_WORKSPACE/artifacthub-repo.yml ./artifacthub-repo.yml 2>/dev/null || true
+          git checkout main -- artifacthub-repo.yml
+          git add artifacthub-repo.yml
+          git diff --staged --quiet || git commit -m "Update Artifact Hub repository metadata"
+          git push origin gh-pages
