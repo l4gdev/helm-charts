@@ -1,0 +1,24 @@
+{{- if .Values.web.share.enabled }}
+{{- $component := "share" }}
+{{- $componentConfig := .Values.web.share }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ente-photos.fullname" . }}-web-{{ $component }}-config
+  labels:
+    {{- include "ente-photos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web-{{ $component }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  .env.local: |
+    # Ente Share Web App Configuration
+    NEXT_PUBLIC_ENTE_ENDPOINT={{ include "ente-photos.museum.apiUrl" . }}
+    {{- if $componentConfig.config }}
+    {{- range $key, $value := $componentConfig.config.extra }}
+    {{ $key }}={{ $value }}
+    {{- end }}
+    {{- end }}
+{{- end }}

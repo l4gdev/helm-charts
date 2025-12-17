@@ -1,0 +1,129 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "ente-photos.fullname" . }}
+  labels:
+    {{- include "ente-photos.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "ente-photos.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress traffic to museum API
+    - from:
+        - namespaceSelector: {}
+          podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.museum.config.http.port | default 8080 }}
+        {{- if .Values.metrics.enabled }}
+        - protocol: TCP
+          port: {{ .Values.metrics.port | default 2112 }}
+        {{- end }}
+    # Allow ingress traffic to web frontends
+    {{- if .Values.web.photos.enabled }}
+    - from:
+        - namespaceSelector: {}
+          podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.web.photos.containerPort | default 3000 }}
+    {{- end }}
+    {{- if .Values.web.auth.enabled }}
+    - from:
+        - namespaceSelector: {}
+          podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.web.auth.containerPort | default 3000 }}
+    {{- end }}
+    {{- if .Values.web.accounts.enabled }}
+    - from:
+        - namespaceSelector: {}
+          podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.web.accounts.containerPort | default 3000 }}
+    {{- end }}
+    {{- if .Values.web.cast.enabled }}
+    - from:
+        - namespaceSelector: {}
+          podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.web.cast.containerPort | default 3000 }}
+    {{- end }}
+    {{- if .Values.web.share.enabled }}
+    - from:
+        - namespaceSelector: {}
+          podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.web.share.containerPort | default 3000 }}
+    {{- end }}
+    {{- with .Values.networkPolicy.additionalIngressRules }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow PostgreSQL connection
+    - to:
+        {{- if .Values.postgresql.enabled }}
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+        {{- else }}
+        - ipBlock:
+            cidr: 0.0.0.0/0
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ include "ente-photos.postgresql.port" . }}
+    # Allow S3 connections (external)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+    # Allow SMTP connections (if enabled)
+    {{- if .Values.credentials.smtp.enabled }}
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: {{ .Values.credentials.smtp.port | default 587 }}
+        - protocol: TCP
+          port: 465
+        - protocol: TCP
+          port: 25
+    {{- end }}
+    {{- with .Values.networkPolicy.additionalEgressRules }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

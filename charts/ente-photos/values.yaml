@@ -1,0 +1,825 @@
+# Default values for Ente Photos
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# =============================================================================
+# GLOBAL CONFIGURATION
+# =============================================================================
+global:
+  # -- Global storage class for PVC provisioning
+  storageClass: ""
+
+# -- Override the name of the chart
+nameOverride: ""
+
+# -- Override the full name of the release
+fullnameOverride: ""
+
+# -- Additional labels for all resources
+commonLabels: {}
+
+# -- Additional annotations for all resources
+commonAnnotations: {}
+
+# -- Image pull secrets for private registries
+imagePullSecrets: []
+
+# =============================================================================
+# MUSEUM SERVER CONFIGURATION (Main API Server)
+# =============================================================================
+museum:
+  # -- Museum server image configuration
+  image:
+    # -- Museum server image repository
+    repository: ghcr.io/ente-io/server
+    # -- Museum server image tag (defaults to "latest")
+    tag: "latest"
+    # -- Museum server image pull policy
+    pullPolicy: IfNotPresent
+
+  # -- Number of Museum server replicas
+  replicaCount: 1
+
+  # -- Museum server container resource requests and limits
+  resources: {}
+    # requests:
+    #   cpu: 200m
+    #   memory: 256Mi
+    # limits:
+    #   cpu: 1000m
+    #   memory: 1Gi
+
+  # -- Additional environment variables for Museum server
+  env: []
+    # - name: CUSTOM_VAR
+    #   value: "custom-value"
+
+  # -- Additional environment variables from ConfigMaps or Secrets
+  envFrom: []
+    # - configMapRef:
+    #     name: extra-config
+    # - secretRef:
+    #     name: extra-secrets
+
+  # -- Additional volume mounts for Museum server
+  extraVolumeMounts: []
+
+  # -- Additional volumes for Museum server
+  extraVolumes: []
+
+  # -- Init containers for Museum server
+  initContainers: []
+
+  # -- Security context for Museum server container
+  securityContext: {}
+    # runAsNonRoot: true
+    # runAsUser: 65534
+    # allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem: true
+    # capabilities:
+    #   drop:
+    #     - ALL
+
+  # -- Pod security context for Museum server
+  podSecurityContext:
+    fsGroup: 65534
+    # runAsNonRoot: true
+    # seccompProfile:
+    #   type: RuntimeDefault
+
+  # -- Pod annotations for Museum server
+  podAnnotations: {}
+
+  # -- Pod labels for Museum server
+  podLabels: {}
+
+  # -- Node selector for Museum server
+  nodeSelector: {}
+
+  # -- Tolerations for Museum server
+  tolerations: []
+
+  # -- Affinity rules for Museum server
+  affinity: {}
+
+  # -- Topology spread constraints for Museum server
+  topologySpreadConstraints: []
+
+  # -- Priority class name for Museum server
+  priorityClassName: ""
+
+  # -- Termination grace period in seconds
+  terminationGracePeriodSeconds: 30
+
+  # -- Update strategy for Museum deployment
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  # -- Museum server configuration (museum.yaml)
+  config:
+    # HTTP server configuration
+    http:
+      # -- HTTP port for the server
+      port: 8080
+      # -- Enable TLS
+      useTls: false
+
+    # Database configuration (connection details from postgresql section)
+    db:
+      # -- SSL mode for database connection (disable, require, verify-full)
+      sslmode: "disable"
+      # -- Maximum open connections
+      maxOpenConns: 25
+      # -- Maximum idle connections
+      maxIdleConns: 5
+
+    # Application endpoints (update these to match your ingress configuration)
+    apps:
+      # -- Public albums endpoint URL
+      publicAlbums: "https://albums.ente.local"
+      # -- Embed albums endpoint URL
+      embedAlbums: "https://embed.ente.local"
+      # -- Public locker (share) endpoint URL
+      publicLocker: "https://share.ente.local"
+      # -- Cast endpoint URL
+      cast: "https://cast.ente.local"
+      # -- Accounts endpoint URL
+      accounts: "https://accounts.ente.local"
+      # -- Family portal URL
+      family: "https://family.ente.local"
+      # -- Custom CNAME domain
+      cname: ""
+
+    # Internal settings
+    internal:
+      # -- Disable external notifications (silent mode)
+      silent: false
+      # -- List of admin user IDs
+      admins: []
+      # -- Disable new user registration
+      disableRegistration: false
+      # -- Hardcoded OTT for development (DO NOT USE IN PRODUCTION)
+      hardcodedOtt: {}
+        # email: "test@example.com"
+        # ott: "123456"
+
+    # Replication configuration
+    replication:
+      # -- Enable multi-datacenter replication
+      enabled: false
+      # -- Number of replication workers
+      workers: 3
+
+    # Background jobs configuration
+    jobs:
+      cron:
+        # -- Skip background cron jobs
+        skip: false
+
+    # WebAuthn configuration (for passkeys/MFA)
+    webauthn:
+      # -- Enable WebAuthn
+      enabled: false
+      # -- Relying Party ID (usually your domain)
+      rpid: ""
+      # -- Allowed origins for WebAuthn
+      rporigins: []
+
+    # Clear orphan objects configuration
+    clearOrphanObjects:
+      enabled: false
+      prefix: ""
+
+    # S3 storage configuration (for main museum.yaml, not credentials)
+    s3:
+      # -- Mark buckets as local (for MinIO/self-hosted S3)
+      areLocalBuckets: false
+      # -- Use path-style URLs (required for MinIO)
+      usePathStyleUrls: false
+
+    # -- Additional museum.yaml configuration (raw YAML)
+    extraConfig: ""
+
+  # Persistence for Museum server
+  persistence:
+    data:
+      # -- Enable data persistence
+      enabled: false
+      # -- Storage class for data PVC
+      storageClass: ""
+      # -- Access modes for data PVC
+      accessModes:
+        - ReadWriteOnce
+      # -- Storage size for data
+      size: 1Gi
+      # -- Annotations for data PVC
+      annotations: {}
+
+  # Museum service configuration
+  service:
+    # -- Service type
+    type: ClusterIP
+    # -- Service port
+    port: 8080
+    # -- Service annotations
+    annotations: {}
+    # -- Load balancer IP (for LoadBalancer type)
+    loadBalancerIP: ""
+    # -- Load balancer source ranges
+    loadBalancerSourceRanges: []
+    # -- External IPs
+    externalIPs: []
+    # -- Node port (for NodePort type)
+    nodePort: ""
+
+  # Museum ingress configuration
+  ingress:
+    # -- Enable ingress for Museum API
+    enabled: false
+    # -- Ingress class name
+    className: ""
+    # -- Ingress annotations
+    annotations: {}
+      # cert-manager.io/cluster-issuer: letsencrypt-prod
+      # nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    # -- Ingress hosts configuration
+    hosts:
+      - host: api.ente.local
+        paths:
+          - path: /
+            pathType: Prefix
+    # -- TLS configuration
+    tls: []
+      # - secretName: ente-api-tls
+      #   hosts:
+      #     - api.ente.local
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /ping
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+
+  # -- Readiness probe configuration
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /ping
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 3
+
+  # -- Startup probe configuration
+  startupProbe:
+    enabled: true
+    httpGet:
+      path: /ping
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 30
+
+# =============================================================================
+# CREDENTIALS CONFIGURATION (Secrets)
+# =============================================================================
+credentials:
+  # -- Use existing secret for credentials (must contain credentials.yaml)
+  existingSecret: ""
+
+  # S3 Object Storage Configuration
+  s3:
+    # -- Primary bucket name identifier in credentials
+    primaryBucketName: "b2-eu-cen"
+    # Primary storage bucket
+    primary:
+      # -- S3 access key
+      key: ""
+      # -- S3 secret key
+      secret: ""
+      # -- S3 endpoint URL
+      endpoint: ""
+      # -- S3 region
+      region: ""
+      # -- S3 bucket name
+      bucket: ""
+      # -- Mark as local buckets (for MinIO-like setups)
+      areLocalBuckets: false
+
+    # -- Derived bucket name identifier in credentials
+    derivedBucketName: "wasabi-eu-central-2-derived"
+    # Derived storage bucket (for thumbnails, derivatives)
+    derived:
+      # -- Enable derived storage
+      enabled: false
+      # -- S3 access key
+      key: ""
+      # -- S3 secret key
+      secret: ""
+      # -- S3 endpoint URL
+      endpoint: ""
+      # -- S3 region
+      region: ""
+      # -- S3 bucket name
+      bucket: ""
+
+    # -- Additional S3 buckets (for multi-datacenter setups)
+    additional: {}
+      # wasabi-eu-central-2-v3:
+      #   key: ""
+      #   secret: ""
+      #   endpoint: ""
+      #   region: ""
+      #   bucket: ""
+
+  # Encryption configuration
+  # IMPORTANT: Keys must be base64-encoded (NOT hex!)
+  # Generate with: cd ente/server && go run tools/gen-random-keys/main.go
+  # Or manually:
+  #   key.encryption: openssl rand 32 | base64  (standard base64)
+  #   key.hash: openssl rand 64 | base64  (standard base64)
+  encryption:
+    # -- Encryption key for user emails (32 random bytes, standard base64, auto-generated if empty)
+    # Example: "i9xMYgdVW/7tkXNZ39HbW/fMfS5pXZ6NDgYmMRICSPg="
+    key: ""
+    # -- Hash key (64 random bytes, standard base64, auto-generated if empty)
+    # Example: "nEZ3vMszJQyi5SWZl2ouxdotaFSJRTK4vkoEI5aN1kQhvgYxRLq4gJgk7f4cTS0wJYql2jQhVUm9oB1y2L8l5g=="
+    hash: ""
+
+  # JWT configuration
+  # IMPORTANT: Secret must be standard base64-encoded (NOT hex, NOT URL-safe!)
+  # Generate with: openssl rand 32 | base64
+  jwt:
+    # -- JWT signing secret (32 random bytes, standard base64, auto-generated if empty)
+    # Example: "Pdl5M1YDf8foxryxuHVHk83YhDSWpJvk9P97rY3dJkE="
+    secret: ""
+
+  # SMTP configuration
+  smtp:
+    # -- Enable SMTP
+    enabled: false
+    # -- SMTP host
+    host: ""
+    # -- SMTP port
+    port: 587
+    # -- SMTP username
+    username: ""
+    # -- SMTP password
+    password: ""
+    # -- From email address
+    from: ""
+
+  # Transmail (Zoho Zeptomail) configuration
+  transmail:
+    # -- Enable Transmail
+    enabled: false
+    # -- Transmail API key
+    key: ""
+
+  # Stripe configuration (optional)
+  stripe:
+    # -- Enable Stripe integration
+    enabled: false
+    # -- Stripe webhook path
+    path: "/stripe/webhook"
+    # US region configuration
+    us:
+      key: ""
+      secret: ""
+      webhookSecret: ""
+    # India region configuration
+    in:
+      key: ""
+      secret: ""
+      webhookSecret: ""
+
+  # Apple IAP configuration (optional)
+  apple:
+    # -- Apple shared secret for IAP validation
+    sharedSecret: ""
+
+  # Discord notifications configuration (optional)
+  discord:
+    # -- Discord bot token
+    botToken: ""
+    # -- Discord channel ID
+    channelId: ""
+
+  # -- Additional credentials (raw YAML)
+  extraCredentials: ""
+
+# =============================================================================
+# POSTGRESQL CONFIGURATION (Bundled)
+# =============================================================================
+postgresql:
+  # -- Enable bundled PostgreSQL (using Bitnami chart)
+  enabled: true
+
+  auth:
+    # -- PostgreSQL database name
+    database: "ente_db"
+    # -- PostgreSQL username
+    username: "ente"
+    # -- PostgreSQL password (auto-generated if empty)
+    password: ""
+    # -- Use existing secret for PostgreSQL credentials
+    existingSecret: ""
+    secretKeys:
+      userPasswordKey: "password"
+
+  primary:
+    persistence:
+      # -- Enable PostgreSQL persistence
+      enabled: true
+      # -- Storage class for PostgreSQL PVC
+      storageClass: ""
+      # -- Storage size for PostgreSQL
+      size: 10Gi
+
+    resources: {}
+      # requests:
+      #   cpu: 100m
+      #   memory: 256Mi
+      # limits:
+      #   cpu: 500m
+      #   memory: 512Mi
+
+# =============================================================================
+# EXTERNAL DATABASE CONFIGURATION
+# =============================================================================
+externalDatabase:
+  # -- Use external PostgreSQL instead of bundled
+  enabled: false
+  # -- External database host
+  host: ""
+  # -- External database port
+  port: 5432
+  # -- External database name
+  database: "ente_db"
+  # -- External database user
+  user: "ente"
+  # -- External database password
+  password: ""
+  # Use existing secret for external database
+  existingSecret:
+    # -- Enable existing secret
+    enabled: false
+    # -- Secret name
+    secretName: ""
+    # -- Password key in secret
+    passwordKey: "password"
+
+# =============================================================================
+# WEB FRONTENDS CONFIGURATION
+# =============================================================================
+web:
+  # Common image configuration for all frontends
+  image:
+    # -- Default web frontend image repository
+    repository: ghcr.io/ente-io/web
+    # -- Default web frontend image tag
+    tag: "latest"
+    # -- Default web frontend image pull policy
+    pullPolicy: IfNotPresent
+
+  # ---------------------------------------------------------------------------
+  # Photos Web App
+  # ---------------------------------------------------------------------------
+  photos:
+    # -- Enable Photos web app
+    enabled: true
+    # -- Number of replicas
+    replicaCount: 1
+
+    # Image override (uses web.image if not specified)
+    image: {}
+      # repository: ""
+      # tag: ""
+      # pullPolicy: ""
+
+    # -- Container port
+    containerPort: 3000
+
+    # -- Resources for Photos web app
+    resources: {}
+
+    # -- Environment variables
+    env: []
+
+    # -- Environment variables from ConfigMaps/Secrets
+    envFrom: []
+
+    # -- Extra volume mounts
+    extraVolumeMounts: []
+
+    # -- Extra volumes
+    extraVolumes: []
+
+    # -- Security context
+    securityContext: {}
+
+    # -- Pod security context
+    podSecurityContext: {}
+
+    # -- Pod annotations
+    podAnnotations: {}
+
+    # -- Pod labels
+    podLabels: {}
+
+    # -- Node selector
+    nodeSelector: {}
+
+    # -- Tolerations
+    tolerations: []
+
+    # -- Affinity
+    affinity: {}
+
+    # Photos configuration
+    config:
+      # -- Albums endpoint for photos app
+      albumsEndpoint: ""
+      # -- Extra environment variables (key: value)
+      extra: {}
+
+    # Service configuration
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+
+    # Ingress configuration
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - host: photos.ente.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+        # - secretName: ente-photos-tls
+        #   hosts:
+        #     - photos.ente.local
+
+    # Probes (optional - frontends typically don't need complex probes)
+    livenessProbe:
+      enabled: false
+    readinessProbe:
+      enabled: false
+
+  # ---------------------------------------------------------------------------
+  # Auth Web App
+  # ---------------------------------------------------------------------------
+  auth:
+    # -- Enable Auth web app
+    enabled: true
+    # -- Number of replicas
+    replicaCount: 1
+
+    image: {}
+    containerPort: 3000
+    resources: {}
+    env: []
+    envFrom: []
+    extraVolumeMounts: []
+    extraVolumes: []
+    securityContext: {}
+    podSecurityContext: {}
+    podAnnotations: {}
+    podLabels: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+    config:
+      extra: {}
+
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - host: auth.ente.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+
+  # ---------------------------------------------------------------------------
+  # Accounts Web App
+  # ---------------------------------------------------------------------------
+  accounts:
+    # -- Enable Accounts web app
+    enabled: true
+    # -- Number of replicas
+    replicaCount: 1
+
+    image: {}
+    containerPort: 3000
+    resources: {}
+    env: []
+    envFrom: []
+    extraVolumeMounts: []
+    extraVolumes: []
+    securityContext: {}
+    podSecurityContext: {}
+    podAnnotations: {}
+    podLabels: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+    config:
+      extra: {}
+
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - host: accounts.ente.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+
+  # ---------------------------------------------------------------------------
+  # Cast Web App
+  # ---------------------------------------------------------------------------
+  cast:
+    # -- Enable Cast web app (Chromecast support)
+    enabled: false
+    # -- Number of replicas
+    replicaCount: 1
+
+    image: {}
+    containerPort: 3000
+    resources: {}
+    env: []
+    envFrom: []
+    extraVolumeMounts: []
+    extraVolumes: []
+    securityContext: {}
+    podSecurityContext: {}
+    podAnnotations: {}
+    podLabels: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+    config:
+      extra: {}
+
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - host: cast.ente.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+
+  # ---------------------------------------------------------------------------
+  # Share Web App
+  # ---------------------------------------------------------------------------
+  share:
+    # -- Enable Share web app (public sharing)
+    enabled: true
+    # -- Number of replicas
+    replicaCount: 1
+
+    image: {}
+    containerPort: 3000
+    resources: {}
+    env: []
+    envFrom: []
+    extraVolumeMounts: []
+    extraVolumes: []
+    securityContext: {}
+    podSecurityContext: {}
+    podAnnotations: {}
+    podLabels: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+    config:
+      extra: {}
+
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - host: share.ente.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+
+# =============================================================================
+# METRICS & MONITORING CONFIGURATION
+# =============================================================================
+metrics:
+  # -- Enable Prometheus metrics endpoint
+  enabled: true
+  # -- Metrics port
+  port: 2112
+
+  # ServiceMonitor configuration (for prometheus-operator)
+  serviceMonitor:
+    # -- Enable ServiceMonitor
+    enabled: true
+    # -- ServiceMonitor namespace (defaults to release namespace)
+    namespace: ""
+    # -- Scrape interval
+    interval: 30s
+    # -- Scrape timeout
+    scrapeTimeout: 10s
+    # -- Metrics path
+    path: /metrics
+    # -- Scheme (http or https)
+    scheme: http
+    # -- Additional labels for ServiceMonitor
+    labels: {}
+    # -- Annotations for ServiceMonitor
+    annotations: {}
+    # -- TLS configuration for ServiceMonitor
+    tlsConfig: {}
+    # -- Relabelings for ServiceMonitor
+    relabelings: []
+    # -- Metric relabelings for ServiceMonitor
+    metricRelabelings: []
+
+# =============================================================================
+# SERVICE ACCOUNT CONFIGURATION
+# =============================================================================
+serviceAccount:
+  # -- Create service account
+  create: true
+  # -- Annotations for service account
+  annotations: {}
+  # -- Service account name (auto-generated if empty)
+  name: ""
+  # -- Automount service account token
+  automount: false
+
+# =============================================================================
+# NETWORK POLICY CONFIGURATION
+# =============================================================================
+networkPolicy:
+  # -- Enable network policy
+  enabled: true
+  # -- Additional ingress rules
+  additionalIngressRules: []
+  # -- Additional egress rules
+  additionalEgressRules: []
+
+# =============================================================================
+# POD DISRUPTION BUDGET CONFIGURATION
+# =============================================================================
+podDisruptionBudget:
+  # -- Enable pod disruption budget
+  enabled: true
+  # -- Minimum available pods
+  minAvailable: 1
+  # -- Maximum unavailable pods (alternative to minAvailable)
+  # maxUnavailable: 1

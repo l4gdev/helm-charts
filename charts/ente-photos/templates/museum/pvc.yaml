@@ -1,0 +1,23 @@
+{{- if .Values.museum.persistence.data.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "ente-photos.museum.fullname" . }}-data
+  labels:
+    {{- include "ente-photos.museum.labels" . | nindent 4 }}
+  {{- with .Values.museum.persistence.data.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- range .Values.museum.persistence.data.accessModes }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- if or .Values.museum.persistence.data.storageClass .Values.global.storageClass }}
+  storageClassName: {{ .Values.museum.persistence.data.storageClass | default .Values.global.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.museum.persistence.data.size | quote }}
+{{- end }}

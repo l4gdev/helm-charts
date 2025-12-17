@@ -1,0 +1,25 @@
+{{- if .Values.web.photos.enabled }}
+{{- $component := "photos" }}
+{{- $componentConfig := .Values.web.photos }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ente-photos.fullname" . }}-web-{{ $component }}
+  labels:
+    {{- include "ente-photos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web-{{ $component }}
+  {{- with $componentConfig.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $componentConfig.service.type | default "ClusterIP" }}
+  ports:
+    - port: {{ $componentConfig.service.port | default 80 }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "ente-photos.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: web-{{ $component }}
+{{- end }}

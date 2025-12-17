@@ -1,0 +1,174 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ente-photos.museum.fullname" . }}
+  labels:
+    {{- include "ente-photos.museum.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.museum.replicaCount }}
+  {{- with .Values.museum.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ente-photos.museum.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/museum/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/museum/secret.yaml") . | sha256sum }}
+        {{- with .Values.museum.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "ente-photos.museum.labels" . | nindent 8 }}
+        {{- with .Values.museum.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ente-photos.serviceAccountName" . }}
+      {{- with .Values.museum.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.museum.priorityClassName }}
+      priorityClassName: {{ . | quote }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.museum.terminationGracePeriodSeconds }}
+      {{- if .Values.museum.initContainers }}
+      initContainers:
+        {{- toYaml .Values.museum.initContainers | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: museum
+          image: "{{ .Values.museum.image.repository }}:{{ .Values.museum.image.tag }}"
+          imagePullPolicy: {{ .Values.museum.image.pullPolicy }}
+          env:
+            - name: ENTE_CREDENTIALS_FILE
+              value: "/credentials/credentials.yaml"
+            # Database connection from secret
+            - name: ENTE_DB_HOST
+              value: {{ include "ente-photos.postgresql.host" . | quote }}
+            - name: ENTE_DB_PORT
+              value: {{ include "ente-photos.postgresql.port" . | quote }}
+            - name: ENTE_DB_NAME
+              value: {{ include "ente-photos.postgresql.database" . | quote }}
+            - name: ENTE_DB_USER
+              value: {{ include "ente-photos.postgresql.username" . | quote }}
+            - name: ENTE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ente-photos.postgresql.secretName" . }}
+                  key: {{ include "ente-photos.postgresql.passwordKey" . }}
+            {{- with .Values.museum.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.museum.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.museum.config.http.port | default 8080 }}
+              protocol: TCP
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.metrics.port | default 2112 }}
+              protocol: TCP
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /museum.yaml
+              subPath: museum.yaml
+              readOnly: true
+            - name: credentials
+              mountPath: /credentials
+              readOnly: true
+            {{- if .Values.museum.persistence.data.enabled }}
+            - name: data
+              mountPath: /data
+            {{- end }}
+            {{- with .Values.museum.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.museum.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.museum.livenessProbe.httpGet.path }}
+              port: {{ .Values.museum.livenessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.museum.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.museum.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.museum.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.museum.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.museum.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.museum.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.museum.readinessProbe.httpGet.path }}
+              port: {{ .Values.museum.readinessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.museum.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.museum.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.museum.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.museum.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.museum.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.museum.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.museum.startupProbe.httpGet.path }}
+              port: {{ .Values.museum.startupProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.museum.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.museum.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.museum.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.museum.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.museum.startupProbe.failureThreshold }}
+          {{- end }}
+          {{- with .Values.museum.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.museum.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "ente-photos.museum.configMapName" . }}
+        - name: credentials
+          secret:
+            secretName: {{ include "ente-photos.credentials.secretName" . }}
+        {{- if .Values.museum.persistence.data.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "ente-photos.museum.fullname" . }}-data
+        {{- end }}
+        {{- with .Values.museum.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.museum.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.museum.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.museum.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.museum.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,105 @@
+{{- if .Values.web.cast.enabled }}
+{{- $component := "cast" }}
+{{- $componentConfig := .Values.web.cast }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ente-photos.fullname" . }}-web-{{ $component }}
+  labels:
+    {{- include "ente-photos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: web-{{ $component }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ $componentConfig.replicaCount | default 1 }}
+  {{- with $componentConfig.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ente-photos.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: web-{{ $component }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/web-cast/configmap.yaml") . | sha256sum }}
+        {{- with $componentConfig.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "ente-photos.labels" . | nindent 8 }}
+        app.kubernetes.io/component: web-{{ $component }}
+        {{- with $componentConfig.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ente-photos.serviceAccountName" . }}
+      {{- with $componentConfig.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: web-{{ $component }}
+          image: "{{ $componentConfig.image.repository | default .Values.web.image.repository }}:{{ $componentConfig.image.tag | default .Values.web.image.tag }}"
+          imagePullPolicy: {{ $componentConfig.image.pullPolicy | default .Values.web.image.pullPolicy }}
+          env:
+            - name: ENTE_API_ORIGIN
+              value: {{ include "ente-photos.museum.apiUrl" . | quote }}
+            {{- with (include "ente-photos.web.photosUrl" .) }}
+            - name: ENTE_PHOTOS_ORIGIN
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with $componentConfig.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with $componentConfig.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $componentConfig.containerPort | default 3000 }}
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /app/.env.local
+              subPath: .env.local
+              readOnly: true
+            {{- with $componentConfig.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with $componentConfig.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $componentConfig.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "ente-photos.fullname" . }}-web-{{ $component }}-config
+        {{- with $componentConfig.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with $componentConfig.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $componentConfig.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $componentConfig.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

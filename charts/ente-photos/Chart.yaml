@@ -1,0 +1,47 @@
+apiVersion: v2
+name: ente-photos
+description: A Helm chart for Ente Photos - end-to-end encrypted photo storage and backup platform
+icon: https://ente.io/images/favicon/favicon-196x196.png
+home: https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos
+sources:
+  - https://github.com/ente-io/ente
+  - https://github.com/l4gdev/helm-charts
+keywords:
+  - ente
+  - photos
+  - gallery
+  - encryption
+  - privacy
+  - self-hosted
+  - e2ee
+  - backup
+  - storage
+maintainers:
+  - name: L4G
+    email: contact@l4g.dev
+type: application
+version: 0.1.0
+appVersion: "latest"
+
+dependencies:
+  - name: postgresql
+    version: "~16.x"
+    repository: "oci://registry-1.docker.io/bitnamicharts"
+    condition: postgresql.enabled
+
+annotations:
+  artifacthub.io/category: storage
+  artifacthub.io/license: AGPL-3.0
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos
+    - name: Ente Documentation
+      url: https://ente.io/help/self-hosting/
+    - name: Ente GitHub
+      url: https://github.com/ente-io/ente
+  artifacthub.io/operator: "false"
+  artifacthub.io/prerelease: "false"
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release of Ente Photos Helm chart
