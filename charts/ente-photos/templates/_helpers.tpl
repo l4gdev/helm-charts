@@ -127,62 +127,38 @@ Secret name for credentials
 {{- end }}
 
 {{/*
-PostgreSQL host - handles both bundled and external
+PostgreSQL host
 */}}
 {{- define "ente-photos.postgresql.host" -}}
-{{- if .Values.postgresql.enabled }}
-{{- printf "%s-postgresql" .Release.Name }}
-{{- else if .Values.externalDatabase.enabled }}
-{{- .Values.externalDatabase.host }}
-{{- else }}
-{{- fail "Either postgresql.enabled or externalDatabase.enabled must be true" }}
-{{- end }}
+{{- required "externalDatabase.host is required" .Values.externalDatabase.host }}
 {{- end }}
 
 {{/*
 PostgreSQL port
 */}}
 {{- define "ente-photos.postgresql.port" -}}
-{{- if .Values.postgresql.enabled }}
-{{- default 5432 .Values.postgresql.primary.service.ports.postgresql }}
-{{- else }}
 {{- default 5432 .Values.externalDatabase.port }}
-{{- end }}
 {{- end }}
 
 {{/*
 PostgreSQL database name
 */}}
 {{- define "ente-photos.postgresql.database" -}}
-{{- if .Values.postgresql.enabled }}
-{{- .Values.postgresql.auth.database }}
-{{- else }}
-{{- .Values.externalDatabase.database }}
-{{- end }}
+{{- default "ente_db" .Values.externalDatabase.database }}
 {{- end }}
 
 {{/*
 PostgreSQL username
 */}}
 {{- define "ente-photos.postgresql.username" -}}
-{{- if .Values.postgresql.enabled }}
-{{- .Values.postgresql.auth.username }}
-{{- else }}
-{{- .Values.externalDatabase.user }}
-{{- end }}
+{{- default "ente" .Values.externalDatabase.user }}
 {{- end }}
 
 {{/*
 PostgreSQL secret name
 */}}
 {{- define "ente-photos.postgresql.secretName" -}}
-{{- if .Values.postgresql.enabled }}
-{{- if .Values.postgresql.auth.existingSecret }}
-{{- .Values.postgresql.auth.existingSecret }}
-{{- else }}
-{{- printf "%s-postgresql" .Release.Name }}
-{{- end }}
-{{- else if .Values.externalDatabase.existingSecret.enabled }}
+{{- if .Values.externalDatabase.existingSecret.enabled }}
 {{- .Values.externalDatabase.existingSecret.secretName }}
 {{- else }}
 {{- include "ente-photos.credentials.secretName" . }}
@@ -193,9 +169,7 @@ PostgreSQL secret name
 PostgreSQL password key in secret
 */}}
 {{- define "ente-photos.postgresql.passwordKey" -}}
-{{- if .Values.postgresql.enabled }}
-{{- default "password" .Values.postgresql.auth.secretKeys.userPasswordKey }}
-{{- else if .Values.externalDatabase.existingSecret.enabled }}
+{{- if .Values.externalDatabase.existingSecret.enabled }}
 {{- .Values.externalDatabase.existingSecret.passwordKey }}
 {{- else }}
 {{- "db-password" }}

@@ -23,12 +23,6 @@ type: application
 version: 0.1.0
 appVersion: "latest"
 
-dependencies:
-  - name: postgresql
-    version: "~16.x"
-    repository: "oci://registry-1.docker.io/bitnamicharts"
-    condition: postgresql.enabled
-
 annotations:
   artifacthub.io/category: storage
   artifacthub.io/license: AGPL-3.0

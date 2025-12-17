@@ -422,64 +422,28 @@ credentials:
   extraCredentials: ""
 
 # =============================================================================
-# POSTGRESQL CONFIGURATION (Bundled)
+# DATABASE CONFIGURATION (External PostgreSQL Required)
 # =============================================================================
-postgresql:
-  # -- Enable bundled PostgreSQL (using Bitnami chart)
-  enabled: true
-
-  auth:
-    # -- PostgreSQL database name
-    database: "ente_db"
-    # -- PostgreSQL username
-    username: "ente"
-    # -- PostgreSQL password (auto-generated if empty)
-    password: ""
-    # -- Use existing secret for PostgreSQL credentials
-    existingSecret: ""
-    secretKeys:
-      userPasswordKey: "password"
-
-  primary:
-    persistence:
-      # -- Enable PostgreSQL persistence
-      enabled: true
-      # -- Storage class for PostgreSQL PVC
-      storageClass: ""
-      # -- Storage size for PostgreSQL
-      size: 10Gi
-
-    resources: {}
-      # requests:
-      #   cpu: 100m
-      #   memory: 256Mi
-      # limits:
-      #   cpu: 500m
-      #   memory: 512Mi
-
-# =============================================================================
-# EXTERNAL DATABASE CONFIGURATION
-# =============================================================================
+# This chart requires an external PostgreSQL database.
+# Recommended: CloudNativePG (CNPG), Zalando PostgreSQL Operator, or managed PostgreSQL.
 externalDatabase:
-  # -- Use external PostgreSQL instead of bundled
-  enabled: false
-  # -- External database host
+  # -- Database host (REQUIRED)
   host: ""
-  # -- External database port
+  # -- Database port
   port: 5432
-  # -- External database name
+  # -- Database name
   database: "ente_db"
-  # -- External database user
+  # -- Database user
   user: "ente"
-  # -- External database password
+  # -- Database password (required if not using existingSecret)
   password: ""
-  # Use existing secret for external database
+  # Use existing secret for database credentials
   existingSecret:
-    # -- Enable existing secret
+    # -- Use existing secret instead of password field
     enabled: false
-    # -- Secret name
+    # -- Secret name containing the password
     secretName: ""
-    # -- Password key in secret
+    # -- Key in secret containing the password
     passwordKey: "password"
 
 # =============================================================================

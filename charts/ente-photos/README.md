@@ -10,8 +10,8 @@ This chart deploys Ente Photos on a Kubernetes cluster using the Helm package ma
 
 - Kubernetes 1.23+
 - Helm 3.8+
-- PV provisioner support in the underlying infrastructure (for PostgreSQL persistence)
-- S3-compatible object storage (AWS S3, Wasabi, Backblaze B2, Scaleway, etc.)
+- **External PostgreSQL database** (CloudNativePG, Zalando Operator, or managed PostgreSQL)
+- S3-compatible object storage (AWS S3, MinIO, Wasabi, Backblaze B2, Scaleway, etc.)
 
 ## Components
 
@@ -20,12 +20,13 @@ This chart deploys the following components:
 | Component | Description | Default |
 |-----------|-------------|---------|
 | **Museum** | Main API server (Go backend) | Enabled |
-| **PostgreSQL** | Database (Bitnami subchart) | Enabled |
 | **Web Photos** | Photos web application | Enabled |
 | **Web Auth** | Authentication web application | Enabled |
 | **Web Accounts** | Account management web application | Enabled |
 | **Web Cast** | Chromecast support web application | Disabled |
 | **Web Share** | Public sharing web application | Enabled |
+
+**Note:** This chart requires an external PostgreSQL database. It does not deploy PostgreSQL.
 
 ## Installing the Chart
 
@@ -49,34 +50,42 @@ helm install ente-photos l4g/ente-photos \
 
 ### Minimal Configuration
 
-At minimum, you need to configure S3 storage:
+You need to configure both the database and S3 storage:
 
 ```yaml
-credentials:
-  s3:
-    primary:
-      key: "your-s3-access-key"
-      secret: "your-s3-secret-key"
-      endpoint: "https://s3.eu-central-1.wasabisys.com"
-      region: "eu-central-1"
-      bucket: "your-bucket-name"
-```
-
-### External PostgreSQL
-
-To use an external PostgreSQL database instead of the bundled one:
-
-```yaml
-postgresql:
-  enabled: false
-
+# Database (required)
 externalDatabase:
-  enabled: true
   host: "your-postgres-host"
   port: 5432
   database: "ente_db"
   user: "ente"
   password: "your-password"
+
+# S3 Storage (required)
+credentials:
+  s3:
+    primary:
+      key: "your-s3-access-key"
+      secret: "your-s3-secret-key"
+      endpoint: "https://s3.your-region.amazonaws.com"
+      region: "your-region"
+      bucket: "your-bucket-name"
+```
+
+### CloudNativePG (CNPG) Example
+
+Using CloudNativePG with existing secret:
+
+```yaml
+externalDatabase:
+  host: "ente-db-rw.database.svc.cluster.local"
+  port: 5432
+  database: "ente_db"
+  user: "ente"
+  existingSecret:
+    enabled: true
+    secretName: "ente-db-app"
+    passwordKey: "password"
 ```
 
 ### Ingress Configuration
@@ -139,9 +148,12 @@ For production, use existing secrets:
 credentials:
   existingSecret: "my-ente-credentials"
 
-postgresql:
-  auth:
-    existingSecret: "my-postgres-credentials"
+externalDatabase:
+  host: "your-postgres-host"
+  existingSecret:
+    enabled: true
+    secretName: "my-postgres-credentials"
+    passwordKey: "password"
 ```
 
 The credentials secret should contain a `credentials.yaml` key with the Ente credentials format.

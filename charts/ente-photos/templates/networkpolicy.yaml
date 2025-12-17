@@ -84,16 +84,10 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Allow PostgreSQL connection
+    # Allow PostgreSQL connection (external database)
     - to:
-        {{- if .Values.postgresql.enabled }}
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: postgresql
-        {{- else }}
         - ipBlock:
             cidr: 0.0.0.0/0
-        {{- end }}
       ports:
         - protocol: TCP
           port: {{ include "ente-photos.postgresql.port" . }}
