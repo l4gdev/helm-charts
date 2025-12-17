@@ -6,8 +6,9 @@ A collection of production-ready Helm charts for deploying various applications 
 
 | Chart | Description |
 |-------|-------------|
-| **[chibisafe](charts/chibisafe)** | Blazing fast file vault and sharing platform for self-hosted file uploads |
-| **[overpass-api](charts/overpass-api)** | Powerful read-only API for querying OpenStreetMap data |
+| **[chibisafe](charts/chibisafe)** | File vault and sharing platform for self-hosted file uploads |
+| **[ente-photos](charts/ente-photos)** | End-to-end encrypted photo storage and backup platform |
+| **[overpass-api](charts/overpass-api)** | Read-only API for querying OpenStreetMap data |
 
 ## Usage
 
@@ -23,6 +24,9 @@ helm repo update
 ```bash
 # Install Chibisafe
 helm install chibisafe l4gdev/chibisafe
+
+# Install Ente Photos
+helm install ente-photos l4gdev/ente-photos
 
 # Install Overpass API
 helm install overpass l4gdev/overpass-api
