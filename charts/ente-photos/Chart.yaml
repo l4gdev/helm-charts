@@ -20,7 +20,7 @@ maintainers:
   - name: L4G
     email: contact@l4g.dev
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "latest"
 
 annotations:
@@ -37,5 +37,7 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |
+    - kind: added
+      description: Added values schema file, fixed logo url
     - kind: added
       description: Initial release of Ente Photos Helm chart
