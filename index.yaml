@@ -19,10 +19,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2025-12-19T14:22:56.334683208Z"
+    created: "2025-12-19T14:34:07.311472457Z"
     description: A Helm chart for Chibisafe - blazing fast file vault and sharing
       platform
-    digest: e035d38595569e41e9ce3a6d3d29aa5a48b37558b8602083fb00fc1a0e3772b6
+    digest: 7b726b82f4b17b5451dfda4c8c0647418dd9e0e6fa589a9d0a1507d6799d6b3e
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe
     icon: https://chibisafe.app/img/logo.svg
     keywords:
@@ -90,6 +90,53 @@ entries:
       artifacthub.io/category: storage
       artifacthub.io/changes: |
         - kind: added
+          description: Added values schema file, fixed logo url
+        - kind: added
+          description: Initial release of Ente Photos Helm chart
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/license: AGPL-3.0
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos
+        - name: Ente Documentation
+          url: https://ente.io/help/self-hosting/
+        - name: Ente GitHub
+          url: https://github.com/ente-io/ente
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: latest
+    created: "2025-12-19T14:34:07.313878957Z"
+    description: A Helm chart for Ente Photos - end-to-end encrypted photo storage
+      and backup platform
+    digest: 8db6f4a7f593270de2566a067bb39c9a72fb648dee2ac0242fcd01e233333c1a
+    home: https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos
+    icon: https://ente.io/assets/ente-photos-icon-transparent.png
+    keywords:
+    - ente
+    - photos
+    - gallery
+    - encryption
+    - privacy
+    - self-hosted
+    - e2ee
+    - backup
+    - storage
+    maintainers:
+    - email: contact@l4g.dev
+      name: L4G
+    name: ente-photos
+    sources:
+    - https://github.com/ente-io/ente
+    - https://github.com/l4gdev/helm-charts
+    type: application
+    urls:
+    - https://l4gdev.github.io/helm-charts/charts/ente-photos-0.1.1.tgz
+    version: 0.1.1
+  - annotations:
+      artifacthub.io/category: storage
+      artifacthub.io/changes: |
+        - kind: added
           description: Initial release of Ente Photos Helm chart
       artifacthub.io/containsSecurityUpdates: "false"
       artifacthub.io/license: AGPL-3.0
@@ -134,14 +181,14 @@ entries:
   freescout:
   - apiVersion: v2
     appVersion: php8.2-1.17.72
-    created: "2025-12-19T14:22:56.341287512Z"
+    created: "2025-12-19T14:34:07.319304043Z"
     dependencies:
     - condition: mariadb.enabled
       name: mariadb
       repository: https://charts.bitnami.com/bitnami
       version: ~11.x
     description: A Helm chart for Kubernetes
-    digest: a211021481f84df85af689dbfa97d944f1fe2d35a2392272ecda56d682c5c93c
+    digest: 93e28ee80832b0c8180bc37515777e1687e5505d60600ec5e54f8b555c9298e2
     icon: https://freescout.net/apple-touch-icon.png
     maintainers:
     - email: contact@l4g.dev
@@ -174,9 +221,9 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2025-12-19T14:22:56.342399746Z"
+    created: "2025-12-19T14:34:07.320427633Z"
     description: A Helm chart for deploying Overpass API - OpenStreetMap query service
-    digest: a5f1aac7af3872e6772b3e475794779966cac647182a9d1b5aed8f5f24dd4c39
+    digest: fe9c0b0f2bdf4a32e78096a0a43e2d8573ca16859bbb405ad3bee62f523bf125
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
     icon: https://wiki.openstreetmap.org/w/images/b/b5/Overpass_API_logo.svg
     keywords:
@@ -292,4 +339,4 @@ entries:
     urls:
     - https://l4gdev.github.io/helm-charts/charts/overpass-api-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-19T14:22:56.332700312Z"
+generated: "2025-12-19T14:34:07.310135366Z"
