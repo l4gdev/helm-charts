@@ -19,10 +19,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2025-12-19T14:01:27.962033289Z"
+    created: "2025-12-19T14:10:17.706504212Z"
     description: A Helm chart for Chibisafe - blazing fast file vault and sharing
       platform
-    digest: 78d54fbff3d4aaf55ee7f30cd68b45f90bc560c7859038d05129d061a3a7b47e
+    digest: db5c84905e7b9c78e06dc69726affa1d1759ed7762b8c882143298a2475053d9
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe
     icon: https://chibisafe.app/img/logo.svg
     keywords:
@@ -104,12 +104,12 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2025-12-19T14:01:27.964437926Z"
+    created: "2025-12-19T14:10:17.708513134Z"
     description: A Helm chart for Ente Photos - end-to-end encrypted photo storage
       and backup platform
-    digest: d69229e32bfa8a80020a98526b9854a6baf5599e29b5af84e152e901e0973777
+    digest: acf855756e7e981dd8ecde615980420a8938eeee5a611af242ed4592fc1a3497
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos
-    icon: https://ente.io/images/favicon/favicon-196x196.png
+    icon: https://ente.io/assets/ente-photos-icon-transparent.png
     keywords:
     - ente
     - photos
@@ -134,14 +134,14 @@ entries:
   freescout:
   - apiVersion: v2
     appVersion: php8.2-1.17.72
-    created: "2025-12-19T14:01:27.969657439Z"
+    created: "2025-12-19T14:10:17.712939231Z"
     dependencies:
     - condition: mariadb.enabled
       name: mariadb
       repository: https://charts.bitnami.com/bitnami
       version: ~11.x
     description: A Helm chart for Kubernetes
-    digest: 45880c880d8e72f061a3538592407e7cc49935e694e83bcf0cd7efb9a03c8e1a
+    digest: 9be43f569f055196f826ad5c31a18e849226bbc72b8efb5f67b96751f2e28c44
     icon: https://freescout.net/apple-touch-icon.png
     maintainers:
     - email: contact@l4g.dev
@@ -174,9 +174,9 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2025-12-19T14:01:27.970752041Z"
+    created: "2025-12-19T14:10:17.714025254Z"
     description: A Helm chart for deploying Overpass API - OpenStreetMap query service
-    digest: 8a2abfcffa4e6a2a59e1cbab1be17423622030c0b7c9b745aef76ac828e200b5
+    digest: ed565761666d2c07d3b5aa12eeadc705e5c7566997712bd8bb4b594c3971fa6b
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
     icon: https://wiki.openstreetmap.org/w/images/b/b5/Overpass_API_logo.svg
     keywords:
@@ -292,4 +292,4 @@ entries:
     urls:
     - https://l4gdev.github.io/helm-charts/charts/overpass-api-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-19T14:01:27.960762779Z"
+generated: "2025-12-19T14:10:17.70526341Z"
