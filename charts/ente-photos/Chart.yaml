@@ -1,7 +1,7 @@
 apiVersion: v2
 name: ente-photos
 description: A Helm chart for Ente Photos - end-to-end encrypted photo storage and backup platform
-icon: https://ente.io/images/favicon/favicon-196x196.png
+icon: https://ente.io/assets/ente-photos-icon-transparent.png
 home: https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos
 sources:
   - https://github.com/ente-io/ente
