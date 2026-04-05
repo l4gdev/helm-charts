@@ -360,10 +360,11 @@ credentials:
     hash: ""
 
   # JWT configuration
-  # IMPORTANT: Secret must be standard base64-encoded (NOT hex, NOT URL-safe!)
-  # Generate with: openssl rand 32 | base64
+  # IMPORTANT: Secret must be URL-safe base64-encoded (NOT hex, NOT standard base64!)
+  # Reference: https://github.com/ente-io/ente/blob/d67b3066d70502b5781c8945640cfc4c5b322f0b/server/cmd/museum/main.go#L128-L131
+  # Generate with: openssl rand 32 | base64 | tr '/+' '_-'
   jwt:
-    # -- JWT signing secret (32 random bytes, standard base64, auto-generated if empty)
+    # -- JWT signing secret (32 random bytes, URL-safe base64, auto-generated if empty)
     # Example: "Pdl5M1YDf8foxryxuHVHk83YhDSWpJvk9P97rY3dJkE="
     secret: ""
 
