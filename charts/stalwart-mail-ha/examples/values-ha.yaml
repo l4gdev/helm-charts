@@ -1,0 +1,87 @@
+# Production reference: 3 replicas, all state external.
+# Postgres for the data store, S3 for blob, Redis for in-memory/coordinator,
+# external SMTP smarthost. Run `stalwart-cli apply` against the running cluster
+# to install the matching server-side configuration.
+
+replicaCount: 3
+
+publicUrl: "https://mail.example.com"
+
+dataStore:
+  type: postgres
+  postgres:
+    host: pg-cluster.example.svc
+    port: 5432
+    database: stalwart
+    username: stalwart
+    existingSecret: stalwart-pg
+    existingSecretKey: password
+    useTls: true
+
+# These hints are documentation-only; real wiring happens in `stalwart-cli apply`.
+backends:
+  blob:
+    type: s3
+  fts:
+    type: dataStore
+  lookup:
+    type: redis
+  coordinator:
+    type: redis
+  directory:
+    type: internal
+  outbound:
+    type: smarthost
+
+service:
+  mail:
+    type: LoadBalancer
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    externalTrafficPolicy: Local
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: mail.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: stalwart-http-tls
+      hosts:
+        - mail.example.com
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    bearerTokenSecret:
+      name: stalwart-metrics-token
+      key: token
+
+networkPolicy:
+  enabled: true
+  allowOutboundSmtp: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 4000m
+    memory: 4Gi

@@ -1,0 +1,358 @@
+# Default values for stalwart-mail-ha.
+# Stalwart v0.16 stores the bulk of its configuration inside the data store
+# (managed via the WebUI or `stalwart-cli apply`). The on-disk config.json that
+# this chart renders contains only the data store wiring; everything else is
+# bootstrapped at runtime.
+
+replicaCount: 2
+
+image:
+  repository: docker.io/stalwartlabs/stalwart
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+  # Use the foundationdb-flavoured image when dataStore.type is "foundationdb".
+  # When unset the chart picks the right variant automatically.
+  variant: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: {}
+commonAnnotations: {}
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 2000
+  runAsGroup: 2000
+  fsGroup: 2000
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 2000
+  capabilities:
+    drop:
+      - ALL
+    # Required for binding to ports below 1024 (SMTP 25, IMAP 143, etc.).
+    add:
+      - NET_BIND_SERVICE
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+# Topology
+nodeSelector: {}
+tolerations: []
+# Soft anti-affinity so replicas spread across nodes when possible.
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: stalwart-mail-ha
+          topologyKey: kubernetes.io/hostname
+topologySpreadConstraints: []
+priorityClassName: ""
+terminationGracePeriodSeconds: 60
+
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+
+# -----------------------------------------------------------------------------
+# Listeners
+# -----------------------------------------------------------------------------
+# Each listener becomes a containerPort and a Service port. The actual binding
+# is configured in the Stalwart server settings (database side); these values
+# only describe the surface Kubernetes exposes.
+listeners:
+  smtp:
+    enabled: true
+    port: 25
+  submission:
+    enabled: true
+    port: 587
+  submissions:
+    enabled: true
+    port: 465
+  imap:
+    enabled: true
+    port: 143
+  imaps:
+    enabled: true
+    port: 993
+  pop3:
+    enabled: false
+    port: 110
+  pop3s:
+    enabled: false
+    port: 995
+  managesieve:
+    enabled: true
+    port: 4190
+  http:
+    enabled: true
+    port: 8080
+
+# -----------------------------------------------------------------------------
+# Services
+# -----------------------------------------------------------------------------
+# Mail TCP traffic (SMTP/IMAP/POP3/ManageSieve) and HTTP traffic (JMAP, admin
+# WebUI, autoconfig) live on separate Services so a cloud LoadBalancer in front
+# of the mail Service does not also expose internal admin endpoints.
+service:
+  mail:
+    type: LoadBalancer
+    annotations: {}
+    externalTrafficPolicy: Local
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+  http:
+    type: ClusterIP
+    port: 8080
+    annotations: {}
+
+# -----------------------------------------------------------------------------
+# Ingress (HTTP only)
+# -----------------------------------------------------------------------------
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/proxy-body-size: 256m
+  hosts:
+    - host: mail.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: stalwart-http-tls
+  #    hosts:
+  #      - mail.example.com
+
+# -----------------------------------------------------------------------------
+# Data store
+# -----------------------------------------------------------------------------
+# Written verbatim into config.json on disk. Stalwart v0.16 derives every other
+# subsystem (blob, fts, lookup, listeners, directories) from records inside
+# this data store.
+dataStore:
+  # One of: postgres | mysql | foundationdb | rocksdb | sqlite
+  type: postgres
+
+  postgres:
+    host: pg-cluster.example.svc
+    port: 5432
+    database: stalwart
+    username: stalwart
+    # Reference an existing Secret holding the password.
+    existingSecret: ""
+    existingSecretKey: STALWART_STORE_PG_PASSWORD
+    # Inline password (only used when existingSecret is empty). Prefer existingSecret.
+    password: ""
+    useTls: false
+    timeout: 30000
+
+  mysql:
+    host: mysql.example.svc
+    port: 3306
+    database: stalwart
+    username: stalwart
+    existingSecret: ""
+    existingSecretKey: STALWART_STORE_MYSQL_PASSWORD
+    password: ""
+    maxAllowedPacket: 16777216
+
+  foundationdb:
+    clusterFile: /etc/foundationdb/fdb.cluster
+    datacenterId: ""
+    transactionTimeout: 60000
+    # Mount a ConfigMap or Secret containing fdb.cluster
+    clusterFileFromSecret: ""
+    clusterFileFromConfigMap: ""
+
+  rocksdb:
+    # RocksDB is single-node only. Force replicaCount=1 in values.
+    path: /data/rocks
+    blobSize: 16777216
+    bufferSize: 67108864
+    poolWorkers: 4
+    # PVC required when dataStore.type=rocksdb.
+    persistence:
+      enabled: true
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 20Gi
+      annotations: {}
+
+  sqlite:
+    path: /data/stalwart.db
+    poolMaxConnections: 10
+    poolWorkers: 4
+    persistence:
+      enabled: true
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 10Gi
+      annotations: {}
+
+# -----------------------------------------------------------------------------
+# Recovery / first-boot bootstrap
+# -----------------------------------------------------------------------------
+# Set recovery.enabled=true for the first deployment so the server starts in
+# recovery mode and exposes /jmap on :8080 with a temporary admin. After
+# applying your initial plan via `stalwart-cli apply`, set this back to false
+# and roll the deployment.
+recovery:
+  enabled: false
+  adminUser: admin
+  # Reference an existing Secret with the admin password.
+  existingSecret: ""
+  existingSecretKey: STALWART_RECOVERY_PASSWORD
+  # Inline password (only used when existingSecret is empty). Strongly prefer
+  # existingSecret in real deployments.
+  adminPassword: ""
+
+# -----------------------------------------------------------------------------
+# Documentation-only references
+# -----------------------------------------------------------------------------
+# These blocks do not template anything by themselves. They exist so that the
+# values file is one place to record the operator's intent for blob, fts,
+# lookup, directory, and outbound configuration. The actual settings are
+# applied via `stalwart-cli apply` against the running server. See the
+# `examples/` directory for ready-to-apply plan files.
+backends:
+  blob:
+    # Hint only. One of: s3 | azure | filesystem | dataStore
+    type: s3
+  fts:
+    # Hint only. One of: dataStore | elasticsearch | meilisearch
+    type: dataStore
+  lookup:
+    # Hint only. One of: redis | dataStore
+    type: redis
+  coordinator:
+    # Hint only. One of: redis | nats | none
+    type: redis
+  directory:
+    # Hint only. One of: internal | ldap | sql | imap | oidc
+    type: internal
+  outbound:
+    # Hint only. One of: direct | smarthost
+    type: direct
+
+# -----------------------------------------------------------------------------
+# Environment variables
+# -----------------------------------------------------------------------------
+# Extra env injected into the Stalwart container. The chart already wires
+# STALWART_PUBLIC_URL, STALWART_RECOVERY_MODE, STALWART_RECOVERY_ADMIN, and the
+# data store password env when applicable.
+publicUrl: "https://mail.example.com"
+extraEnv: []
+#  - name: RUST_LOG
+#    value: info
+extraEnvFrom: []
+#  - secretRef:
+#      name: stalwart-extra-env
+
+# Extra files to project into /etc/stalwart-extras (e.g. CA bundles).
+extraVolumes: []
+extraVolumeMounts: []
+
+# -----------------------------------------------------------------------------
+# Probes
+# -----------------------------------------------------------------------------
+livenessProbe:
+  httpGet:
+    path: /healthz/live
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 6
+
+readinessProbe:
+  httpGet:
+    path: /healthz/ready
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+startupProbe:
+  httpGet:
+    path: /healthz/live
+    port: http
+  periodSeconds: 5
+  failureThreshold: 60
+
+# -----------------------------------------------------------------------------
+# Optional resources
+# -----------------------------------------------------------------------------
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 0
+
+metrics:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /metrics
+    scheme: http
+    labels: {}
+    annotations: {}
+    relabelings: []
+    metricRelabelings: []
+    tlsConfig: {}
+    # Stalwart's /metrics endpoint requires a bearer token. Reference the
+    # Secret holding it; the chart wires it through ServiceMonitor.authorization.
+    bearerTokenSecret:
+      name: ""
+      key: token
+
+networkPolicy:
+  enabled: false
+  # When empty, all namespaces are permitted to reach mail listeners.
+  ingressNamespaceSelector: {}
+  additionalIngressRules: []
+  additionalEgressRules: []
+  # Allow outbound 25/tcp so the server can deliver mail. Disable only if you
+  # use a smarthost reachable on a non-standard port.
+  allowOutboundSmtp: true

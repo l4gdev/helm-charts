@@ -1,0 +1,63 @@
+# Authentik-as-LDAP example. The Helm chart writes config.json with the data
+# store wiring; the LDAP directory itself lives in the database and is applied
+# at runtime via `stalwart-cli apply` against the running server. The
+# accompanying directory plan looks roughly like this (saved as ldap.json):
+#
+# {
+#   "@type": "Plan",
+#   "items": [
+#     {
+#       "@type": "Directory",
+#       "name": "authentik",
+#       "kind": {
+#         "@type": "Ldap",
+#         "url": "ldaps://authentik.example.svc:636",
+#         "baseDn": "dc=example,dc=com",
+#         "bindDn": "cn=ldapservice,ou=users,dc=example,dc=com",
+#         "bindSecret": { "@type": "EnvVar", "envVar": "STALWART_LDAP_BIND_PASSWORD" },
+#         "filterUser": "(&(objectClass=user)(mail=?))",
+#         "filterGroup": "(&(objectClass=group)(member=?))",
+#         "attrEmail": "mail",
+#         "attrName": "displayName",
+#         "tlsAllowInvalidCerts": false
+#       }
+#     }
+#   ]
+# }
+#
+# The chart wires the bind password through extraEnvFrom so the directory plan
+# can reference it as STALWART_LDAP_BIND_PASSWORD.
+
+replicaCount: 2
+
+publicUrl: "https://mail.example.com"
+
+dataStore:
+  type: postgres
+  postgres:
+    host: pg-cluster.example.svc
+    database: stalwart
+    username: stalwart
+    existingSecret: stalwart-pg
+    existingSecretKey: password
+
+backends:
+  directory:
+    type: ldap
+
+extraEnvFrom:
+  - secretRef:
+      name: stalwart-ldap-bind
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: mail.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: stalwart-http-tls
+      hosts:
+        - mail.example.com

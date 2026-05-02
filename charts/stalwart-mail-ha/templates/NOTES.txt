@@ -1,0 +1,41 @@
+Stalwart Mail Server has been deployed.
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Image: {{ include "stalwart-mail-ha.image" . }}
+Replicas: {{ .Values.replicaCount }} ({{ .Values.dataStore.type }} data store)
+
+{{- if .Values.recovery.enabled }}
+
+WARNING: Recovery mode is ENABLED. Only the HTTP listener is up; mail ports are
+closed. Apply your initial configuration with stalwart-cli, then set
+recovery.enabled=false and run `helm upgrade` to bring mail listeners online.
+
+  export STALWART_URL=http://127.0.0.1:8080
+  export STALWART_USER={{ .Values.recovery.adminUser }}
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "stalwart-mail-ha.fullname" . }}-http 8080:{{ .Values.service.http.port }} &
+  stalwart-cli apply --file ./bootstrap.json
+{{- end }}
+
+1. Mail Service ({{ .Values.service.mail.type }}):
+{{- if eq .Values.service.mail.type "LoadBalancer" }}
+   kubectl -n {{ .Release.Namespace }} get svc {{ include "stalwart-mail-ha.fullname" . }}-mail
+   The external IP serves: {{- range $name, $cfg := .Values.listeners }}{{ if and $cfg.enabled (ne $name "http") }} {{ $name }}/{{ $cfg.port }}{{ end }}{{ end }}
+{{- else }}
+   kubectl -n {{ .Release.Namespace }} get svc {{ include "stalwart-mail-ha.fullname" . }}-mail
+{{- end }}
+
+2. HTTP / JMAP / Admin WebUI:
+{{- if .Values.ingress.enabled }}
+   {{- range .Values.ingress.hosts }}
+   https://{{ .host }}
+   {{- end }}
+{{- else }}
+   kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "stalwart-mail-ha.fullname" . }}-http 8080:{{ .Values.service.http.port }}
+   open http://127.0.0.1:8080
+{{- end }}
+
+3. Configure the rest of Stalwart through the WebUI or `stalwart-cli apply`.
+   This chart only renders the data store wiring; SMTP listeners, blob store,
+   directory, DKIM, etc. live inside the database and are managed at runtime.
+   Reference: https://stalw.art/docs/management/cli

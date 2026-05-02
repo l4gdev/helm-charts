@@ -1,0 +1,26 @@
+{{- if eq (include "stalwart-mail-ha.needsPersistence" .) "true" -}}
+{{- if gt (int .Values.replicaCount) 1 -}}
+{{- fail (printf "dataStore.type=%s requires a single-replica deployment with a ReadWriteOnce PVC. Set replicaCount: 1 or pick postgres/mysql/foundationdb for HA." .Values.dataStore.type) -}}
+{{- end -}}
+{{- $cfg := index .Values.dataStore .Values.dataStore.type -}}
+{{- $p := $cfg.persistence -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "stalwart-mail-ha.fullname" . }}-data
+  labels:
+    {{- include "stalwart-mail-ha.labels" . | nindent 4 }}
+  {{- with $p.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml $p.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ $p.size }}
+  {{- with $p.storageClass }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+{{- end }}

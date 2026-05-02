@@ -1,0 +1,18 @@
+# Values used by `ct lint` and `ct install`. RocksDB single-replica is the
+# only configuration that has no external dependencies, so it is what CI
+# exercises by default.
+
+replicaCount: 1
+
+dataStore:
+  type: rocksdb
+  rocksdb:
+    persistence:
+      enabled: true
+      size: 1Gi
+
+service:
+  mail:
+    type: ClusterIP
+
+publicUrl: "http://localhost:8080"

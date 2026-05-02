@@ -1,0 +1,42 @@
+apiVersion: v2
+name: stalwart-mail-ha
+description: Helm chart for Stalwart Mail Server (SMTP, IMAP, JMAP, CalDAV/CardDAV) running multi-replica with all state on external backends
+type: application
+version: 0.1.0
+appVersion: "0.16.3"
+icon: https://stalw.art/img/logo-stalwart.svg
+home: https://github.com/l4gdev/helm-charts/tree/main/charts/stalwart-mail-ha
+sources:
+  - https://github.com/stalwartlabs/stalwart
+  - https://github.com/l4gdev/helm-charts
+keywords:
+  - stalwart
+  - mail
+  - smtp
+  - imap
+  - jmap
+  - caldav
+  - carddav
+  - mailserver
+  - ha
+  - self-hosted
+maintainers:
+  - name: L4G
+    email: contact@l4g.dev
+kubeVersion: ">=1.23.0-0"
+annotations:
+  artifacthub.io/category: communication
+  artifacthub.io/license: AGPL-3.0
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/l4gdev/helm-charts/tree/main/charts/stalwart-mail-ha
+    - name: Stalwart Documentation
+      url: https://stalw.art/docs
+    - name: Stalwart GitHub
+      url: https://github.com/stalwartlabs/stalwart
+  artifacthub.io/operator: "false"
+  artifacthub.io/prerelease: "false"
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release of Stalwart Mail HA chart for v0.16.x

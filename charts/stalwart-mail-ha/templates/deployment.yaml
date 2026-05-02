@@ -1,0 +1,191 @@
+{{- $needsPVC := eq (include "stalwart-mail-ha.needsPersistence" .) "true" -}}
+{{- $listeners := fromYamlArray (include "stalwart-mail-ha.mailListeners" .) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "stalwart-mail-ha.fullname" . }}
+  labels:
+    {{- include "stalwart-mail-ha.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "stalwart-mail-ha.selectorLabels" . | nindent 6 }}
+  {{- with .Values.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include "stalwart-mail-ha.configJson" . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "stalwart-mail-ha.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "stalwart-mail-ha.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: stalwart
+          image: {{ include "stalwart-mail-ha.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          args:
+            - --config=/etc/stalwart/config.json
+          env:
+            - name: STALWART_PUBLIC_URL
+              value: {{ .Values.publicUrl | quote }}
+            {{- if .Values.recovery.enabled }}
+            - name: STALWART_RECOVERY_MODE
+              value: "1"
+            - name: STALWART_RECOVERY_ADMIN
+              value: {{ printf "%s:$(STALWART_RECOVERY_PASSWORD)" .Values.recovery.adminUser | quote }}
+            - name: STALWART_RECOVERY_PASSWORD
+              {{- if .Values.recovery.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.recovery.existingSecret }}
+                  key: {{ .Values.recovery.existingSecretKey }}
+              {{- else }}
+              value: {{ required "recovery.adminPassword or recovery.existingSecret is required when recovery.enabled" .Values.recovery.adminPassword | quote }}
+              {{- end }}
+            {{- end }}
+            {{- if eq .Values.dataStore.type "postgres" }}
+            - name: STALWART_STORE_PG_PASSWORD
+              {{- if .Values.dataStore.postgres.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dataStore.postgres.existingSecret }}
+                  key: {{ .Values.dataStore.postgres.existingSecretKey }}
+              {{- else }}
+              value: {{ required "dataStore.postgres.password or existingSecret required" .Values.dataStore.postgres.password | quote }}
+              {{- end }}
+            {{- else if eq .Values.dataStore.type "mysql" }}
+            - name: STALWART_STORE_MYSQL_PASSWORD
+              {{- if .Values.dataStore.mysql.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dataStore.mysql.existingSecret }}
+                  key: {{ .Values.dataStore.mysql.existingSecretKey }}
+              {{- else }}
+              value: {{ required "dataStore.mysql.password or existingSecret required" .Values.dataStore.mysql.password | quote }}
+              {{- end }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            {{- range $listeners }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.listeners.http.enabled }}
+            - name: http
+              containerPort: {{ .Values.listeners.http.port }}
+              protocol: TCP
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/stalwart
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /var/cache/stalwart
+            {{- if $needsPVC }}
+            - name: data
+              mountPath: /data
+            {{- end }}
+            {{- if and (eq .Values.dataStore.type "foundationdb") .Values.dataStore.foundationdb.clusterFileFromSecret }}
+            - name: fdb-cluster
+              mountPath: /etc/foundationdb
+              readOnly: true
+            {{- else if and (eq .Values.dataStore.type "foundationdb") .Values.dataStore.foundationdb.clusterFileFromConfigMap }}
+            - name: fdb-cluster
+              mountPath: /etc/foundationdb
+              readOnly: true
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "stalwart-mail-ha.configMapName" . }}
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+        {{- if $needsPVC }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "stalwart-mail-ha.fullname" . }}-data
+        {{- end }}
+        {{- if and (eq .Values.dataStore.type "foundationdb") .Values.dataStore.foundationdb.clusterFileFromSecret }}
+        - name: fdb-cluster
+          secret:
+            secretName: {{ .Values.dataStore.foundationdb.clusterFileFromSecret }}
+        {{- else if and (eq .Values.dataStore.type "foundationdb") .Values.dataStore.foundationdb.clusterFileFromConfigMap }}
+        - name: fdb-cluster
+          configMap:
+            name: {{ .Values.dataStore.foundationdb.clusterFileFromConfigMap }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}

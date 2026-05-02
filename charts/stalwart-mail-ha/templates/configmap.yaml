@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "stalwart-mail-ha.configMapName" . }}
+  labels:
+    {{- include "stalwart-mail-ha.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  config.json: |
+{{ include "stalwart-mail-ha.configJson" . | indent 4 }}

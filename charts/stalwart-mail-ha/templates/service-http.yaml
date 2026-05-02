@@ -1,0 +1,28 @@
+{{- if .Values.listeners.http.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "stalwart-mail-ha.fullname" . }}-http
+  labels:
+    {{- include "stalwart-mail-ha.labels" . | nindent 4 }}
+    app.kubernetes.io/component: http
+  {{- with .Values.service.http.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.http.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.http.port }}
+      targetPort: http
+      protocol: TCP
+    {{- if .Values.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.listeners.http.port }}
+      targetPort: http
+      protocol: TCP
+    {{- end }}
+  selector:
+    {{- include "stalwart-mail-ha.selectorLabels" . | nindent 4 }}
+{{- end }}

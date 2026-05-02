@@ -1,0 +1,35 @@
+{{- $listeners := fromYamlArray (include "stalwart-mail-ha.mailListeners" .) -}}
+{{- if $listeners -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "stalwart-mail-ha.fullname" . }}-mail
+  labels:
+    {{- include "stalwart-mail-ha.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mail
+  {{- with .Values.service.mail.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.mail.type }}
+  {{- if and (eq .Values.service.mail.type "LoadBalancer") .Values.service.mail.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.mail.loadBalancerIP }}
+  {{- end }}
+  {{- with .Values.service.mail.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if and (or (eq .Values.service.mail.type "LoadBalancer") (eq .Values.service.mail.type "NodePort")) .Values.service.mail.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.mail.externalTrafficPolicy }}
+  {{- end }}
+  ports:
+    {{- range $listeners }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      targetPort: {{ .name }}
+      protocol: TCP
+    {{- end }}
+  selector:
+    {{- include "stalwart-mail-ha.selectorLabels" . | nindent 4 }}
+{{- end }}

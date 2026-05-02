@@ -1,0 +1,31 @@
+# Single-replica "kick the tires" deployment.
+# RocksDB on local PVC, filesystem blob store, internal directory.
+# Not suitable for production: no HA, all state on one node.
+
+replicaCount: 1
+
+dataStore:
+  type: rocksdb
+  rocksdb:
+    persistence:
+      enabled: true
+      size: 20Gi
+
+publicUrl: "https://mail.example.com"
+
+# Disable mail LoadBalancer for local clusters; use port-forward instead.
+service:
+  mail:
+    type: ClusterIP
+
+listeners:
+  pop3:
+    enabled: false
+  pop3s:
+    enabled: false
+
+# First boot: enable recovery, then disable after applying the bootstrap plan.
+recovery:
+  enabled: true
+  adminUser: admin
+  adminPassword: ChangeMeOnFirstBoot
