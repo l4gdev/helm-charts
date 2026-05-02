@@ -1,0 +1,55 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "bulwark-mail.fullname" . }}
+  labels:
+    {{- include "bulwark-mail.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "bulwark-mail.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        {{- if .Values.networkPolicy.ingressNamespaceSelector }}
+        - namespaceSelector:
+            {{- toYaml .Values.networkPolicy.ingressNamespaceSelector | nindent 12 }}
+        {{- else }}
+        - namespaceSelector: {}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
+        {{- if .Values.metrics.enabled }}
+        - protocol: TCP
+          port: {{ .Values.metrics.port }}
+        {{- end }}
+    {{- with .Values.networkPolicy.additionalIngressRules }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        {{- range .Values.networkPolicy.jmapEgressPorts }}
+        - protocol: TCP
+          port: {{ . }}
+        {{- end }}
+    {{- with .Values.networkPolicy.additionalEgressRules }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

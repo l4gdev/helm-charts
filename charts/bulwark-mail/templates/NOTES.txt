@@ -1,0 +1,37 @@
+Bulwark Mail has been deployed.
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+Replicas: {{ .Values.replicaCount }}
+
+1. Access the webmail:
+{{- if .Values.ingress.enabled }}
+{{- range $h := .Values.ingress.hosts }}
+{{- range .paths }}
+   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $h.host }}{{ .path }}
+{{- end }}
+{{- end }}
+{{- else if eq .Values.service.type "LoadBalancer" }}
+   kubectl -n {{ .Release.Namespace }} get svc {{ include "bulwark-mail.fullname" . }} -w
+{{- else }}
+   kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "bulwark-mail.fullname" . }} 8080:{{ .Values.service.port }}
+   open http://127.0.0.1:8080
+{{- end }}
+
+2. JMAP server:
+   {{ .Values.config.jmapServerUrl }}
+   Make sure this URL resolves from inside the cluster and that the certificate
+   chain is trusted, otherwise login will fail.
+
+{{- if not .Values.session.existingSecret }}
+
+3. Session secret:
+   The chart created Secret/{{ include "bulwark-mail.sessionSecretName" . }} containing
+   a randomly generated session secret. To rotate it, delete the Secret and run
+   `helm upgrade`. To bring your own, set session.existingSecret.
+{{- end }}
+{{- if .Values.oidc.enabled }}
+
+4. OAuth/OIDC enabled at {{ .Values.oidc.issuerUrl }} (client {{ .Values.oidc.clientId }}).
+{{- end }}

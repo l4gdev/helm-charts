@@ -1,0 +1,7 @@
+replicaCount: 1
+
+config:
+  jmapServerUrl: "https://mail.example.com"
+
+ingress:
+  enabled: false

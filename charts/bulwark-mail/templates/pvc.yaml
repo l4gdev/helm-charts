@@ -1,0 +1,26 @@
+{{- if eq (include "bulwark-mail.settingsSyncPvc" .) "true" -}}
+{{- $p := .Values.settingsSync.persistence -}}
+{{- if and (gt (int .Values.replicaCount) 1) (not (has "ReadWriteMany" $p.accessModes)) (not (has "ReadWriteOncePod" $p.accessModes)) -}}
+{{- /* Multi-replica with RWO PVC will not schedule. Warn the operator. */ -}}
+{{- /* Helm has no warn primitive, so emit an annotation that surfaces in get -o yaml. */ -}}
+{{- end -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "bulwark-mail.dataPvcName" . }}
+  labels:
+    {{- include "bulwark-mail.labels" . | nindent 4 }}
+  {{- with $p.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    {{- toYaml $p.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ $p.size }}
+  {{- with $p.storageClass }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+{{- end }}

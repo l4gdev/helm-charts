@@ -1,0 +1,245 @@
+{{- $usePvc := eq (include "bulwark-mail.settingsSyncPvc" .) "true" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bulwark-mail.fullname" . }}
+  labels:
+    {{- include "bulwark-mail.labels" . | nindent 4 }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "bulwark-mail.selectorLabels" . | nindent 6 }}
+  {{- with .Values.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "bulwark-mail.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "bulwark-mail.serviceAccountName" . }}
+      {{- with .Values.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.metrics.port }}
+              protocol: TCP
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: HOSTNAME
+              value: {{ .Values.config.hostname | quote }}
+            - name: PORT
+              value: {{ .Values.config.port | quote }}
+            - name: JMAP_SERVER_URL
+              value: {{ required "config.jmapServerUrl is required" .Values.config.jmapServerUrl | quote }}
+            - name: SESSION_SECRET_FILE
+              value: /etc/bulwark/session-secret
+            {{- if .Values.oidc.enabled }}
+            - name: OAUTH_ENABLED
+              value: "true"
+            - name: OAUTH_CLIENT_ID
+              value: {{ .Values.oidc.clientId | quote }}
+            - name: OAUTH_ISSUER_URL
+              value: {{ .Values.oidc.issuerUrl | quote }}
+            {{- if .Values.oidc.existingClientSecret }}
+            - name: OAUTH_CLIENT_SECRET_FILE
+              value: /etc/bulwark/oauth-client-secret
+            {{- end }}
+            {{- end }}
+            {{- if .Values.settingsSync.enabled }}
+            - name: SETTINGS_SYNC_ENABLED
+              value: "true"
+            - name: SETTINGS_DATA_DIR
+              value: {{ .Values.settingsSync.dataDir | quote }}
+            {{- else }}
+            - name: SETTINGS_SYNC_ENABLED
+              value: "false"
+            {{- end }}
+            {{- if ne .Values.config.appName "" }}
+            - name: APP_NAME
+              value: {{ .Values.config.appName | quote }}
+            {{- end }}
+            {{- if ne .Values.config.appShortName "" }}
+            - name: APP_SHORT_NAME
+              value: {{ .Values.config.appShortName | quote }}
+            {{- end }}
+            {{- if ne .Values.config.appDescription "" }}
+            - name: APP_DESCRIPTION
+              value: {{ .Values.config.appDescription | quote }}
+            {{- end }}
+            {{- if ne .Values.config.faviconUrl "" }}
+            - name: FAVICON_URL
+              value: {{ .Values.config.faviconUrl | quote }}
+            {{- end }}
+            {{- if ne .Values.config.pwaIconUrl "" }}
+            - name: PWA_ICON_URL
+              value: {{ .Values.config.pwaIconUrl | quote }}
+            {{- end }}
+            {{- if ne .Values.config.pwaThemeColor "" }}
+            - name: PWA_THEME_COLOR
+              value: {{ .Values.config.pwaThemeColor | quote }}
+            {{- end }}
+            {{- if ne .Values.config.pwaBackgroundColor "" }}
+            - name: PWA_BACKGROUND_COLOR
+              value: {{ .Values.config.pwaBackgroundColor | quote }}
+            {{- end }}
+            {{- if ne .Values.config.appLogoLightUrl "" }}
+            - name: APP_LOGO_LIGHT_URL
+              value: {{ .Values.config.appLogoLightUrl | quote }}
+            {{- end }}
+            {{- if ne .Values.config.appLogoDarkUrl "" }}
+            - name: APP_LOGO_DARK_URL
+              value: {{ .Values.config.appLogoDarkUrl | quote }}
+            {{- end }}
+            {{- if ne .Values.config.loginLogoLightUrl "" }}
+            - name: LOGIN_LOGO_LIGHT_URL
+              value: {{ .Values.config.loginLogoLightUrl | quote }}
+            {{- end }}
+            {{- if ne .Values.config.loginLogoDarkUrl "" }}
+            - name: LOGIN_LOGO_DARK_URL
+              value: {{ .Values.config.loginLogoDarkUrl | quote }}
+            {{- end }}
+            {{- if ne .Values.config.loginCompanyName "" }}
+            - name: LOGIN_COMPANY_NAME
+              value: {{ .Values.config.loginCompanyName | quote }}
+            {{- end }}
+            {{- if ne .Values.config.loginWebsiteUrl "" }}
+            - name: LOGIN_WEBSITE_URL
+              value: {{ .Values.config.loginWebsiteUrl | quote }}
+            {{- end }}
+            {{- if ne .Values.config.loginImprintUrl "" }}
+            - name: LOGIN_IMPRINT_URL
+              value: {{ .Values.config.loginImprintUrl | quote }}
+            {{- end }}
+            {{- if ne .Values.config.loginPrivacyPolicyUrl "" }}
+            - name: LOGIN_PRIVACY_POLICY_URL
+              value: {{ .Values.config.loginPrivacyPolicyUrl | quote }}
+            {{- end }}
+            {{- if .Values.config.allowCustomJmapEndpoint }}
+            - name: ALLOW_CUSTOM_JMAP_ENDPOINT
+              value: "true"
+            {{- end }}
+            {{- if .Values.config.stalwartFeatures }}
+            - name: STALWART_FEATURES
+              value: "true"
+            {{- end }}
+            {{- if ne .Values.config.extensionDirectoryUrl "" }}
+            - name: EXTENSION_DIRECTORY_URL
+              value: {{ .Values.config.extensionDirectoryUrl | quote }}
+            {{- end }}
+            - name: LOG_FORMAT
+              value: {{ .Values.config.logFormat | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel | quote }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.extraEnvFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: nextjs-cache
+              mountPath: /app/.next/cache
+            - name: data
+              mountPath: /app/data
+            - name: session
+              mountPath: /etc/bulwark/session-secret
+              subPath: {{ .Values.session.existingSecretKey | default "session-secret" }}
+              readOnly: true
+            {{- if and .Values.oidc.enabled .Values.oidc.existingClientSecret }}
+            - name: oauth
+              mountPath: /etc/bulwark/oauth-client-secret
+              subPath: {{ .Values.oidc.existingClientSecretKey }}
+              readOnly: true
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: nextjs-cache
+          emptyDir: {}
+        - name: data
+          {{- if $usePvc }}
+          persistentVolumeClaim:
+            claimName: {{ include "bulwark-mail.dataPvcName" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: session
+          secret:
+            secretName: {{ include "bulwark-mail.sessionSecretName" . }}
+        {{- if and .Values.oidc.enabled .Values.oidc.existingClientSecret }}
+        - name: oauth
+          secret:
+            secretName: {{ .Values.oidc.existingClientSecret }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}

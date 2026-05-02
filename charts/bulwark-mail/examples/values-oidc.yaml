@@ -1,0 +1,36 @@
+# OIDC (Authentik / Keycloak / Okta / etc.) example.
+# The OAuth client secret lives in a Secret you create out-of-band:
+#
+#   kubectl create secret generic bulwark-oidc \
+#     --from-literal=client-secret=$YOUR_OIDC_CLIENT_SECRET
+
+replicaCount: 2
+
+config:
+  jmapServerUrl: "https://mail.example.com"
+
+oidc:
+  enabled: true
+  clientId: bulwark-webmail
+  issuerUrl: "https://idp.example.com/application/o/bulwark/"
+  existingClientSecret: bulwark-oidc
+  existingClientSecretKey: client-secret
+
+session:
+  existingSecret: bulwark-session
+  existingSecretKey: session-secret
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: mail.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: bulwark-tls
+      hosts:
+        - mail.example.com

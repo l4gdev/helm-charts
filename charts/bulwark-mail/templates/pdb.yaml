@@ -1,0 +1,17 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "bulwark-mail.fullname" . }}
+  labels:
+    {{- include "bulwark-mail.labels" . | nindent 4 }}
+spec:
+  {{- if hasKey .Values.podDisruptionBudget "minAvailable" }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- else if hasKey .Values.podDisruptionBudget "maxUnavailable" }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "bulwark-mail.selectorLabels" . | nindent 6 }}
+{{- end }}

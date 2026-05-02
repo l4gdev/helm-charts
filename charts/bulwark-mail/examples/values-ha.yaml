@@ -1,0 +1,61 @@
+# Production reference: 3 replicas behind a multi-host Ingress, ServiceMonitor
+# and NetworkPolicy on. Settings sync uses emptyDir per-pod (re-enable PVC and
+# drop to one replica if you want persistent settings without an external
+# encrypted store).
+
+replicaCount: 3
+
+config:
+  jmapServerUrl: "https://mail.example.com"
+  appName: "Example Mail"
+  loginCompanyName: "Example Inc."
+  loginWebsiteUrl: "https://example.com"
+
+session:
+  existingSecret: bulwark-session
+  existingSecretKey: session-secret
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: mail.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: webmail.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: bulwark-tls
+      hosts:
+        - mail.example.com
+        - webmail.example.com
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+
+networkPolicy:
+  enabled: true
+
+settingsSync:
+  enabled: true
+  persistence:
+    enabled: false

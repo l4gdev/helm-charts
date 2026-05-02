@@ -1,0 +1,13 @@
+# "Kick the tires" deployment: single replica, no Ingress, settings sync via
+# emptyDir. Use port-forward to reach it:
+#   kubectl port-forward svc/bulwark-bulwark-mail 8080:80
+
+replicaCount: 1
+
+config:
+  jmapServerUrl: "https://mail.example.com"
+
+settingsSync:
+  enabled: true
+  persistence:
+    enabled: false

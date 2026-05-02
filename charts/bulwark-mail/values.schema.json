@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "bulwark-mail values",
+  "type": "object",
+  "required": ["replicaCount", "image", "service", "config"],
+  "properties": {
+    "replicaCount": { "type": "integer", "minimum": 1 },
+    "image": {
+      "type": "object",
+      "required": ["repository", "pullPolicy"],
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": "string" },
+        "pullPolicy": { "type": "string", "enum": ["Always", "IfNotPresent", "Never"] }
+      }
+    },
+    "imagePullSecrets": { "type": "array" },
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" },
+    "commonLabels": { "type": "object" },
+    "commonAnnotations": { "type": "object" },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": { "type": "boolean" },
+        "annotations": { "type": "object" },
+        "name": { "type": "string" }
+      }
+    },
+    "podAnnotations": { "type": "object" },
+    "podLabels": { "type": "object" },
+    "podSecurityContext": { "type": "object" },
+    "securityContext": { "type": "object" },
+    "resources": { "type": "object" },
+    "nodeSelector": { "type": "object" },
+    "tolerations": { "type": "array" },
+    "affinity": { "type": "object" },
+    "topologySpreadConstraints": { "type": "array" },
+    "priorityClassName": { "type": "string" },
+    "updateStrategy": { "type": "object" },
+    "service": {
+      "type": "object",
+      "required": ["type", "port", "targetPort"],
+      "properties": {
+        "type": { "type": "string", "enum": ["ClusterIP", "NodePort", "LoadBalancer"] },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "targetPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "annotations": { "type": "object" }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "className": { "type": "string" },
+        "annotations": { "type": "object" },
+        "hosts": { "type": "array" },
+        "tls": { "type": "array" }
+      }
+    },
+    "livenessProbe": { "type": "object" },
+    "readinessProbe": { "type": "object" },
+    "startupProbe": { "type": "object" },
+    "config": {
+      "type": "object",
+      "required": ["jmapServerUrl", "hostname", "port"],
+      "properties": {
+        "jmapServerUrl": { "type": "string", "format": "uri" },
+        "hostname": { "type": "string" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "appName": { "type": "string" },
+        "appShortName": { "type": "string" },
+        "appDescription": { "type": "string" },
+        "faviconUrl": { "type": "string" },
+        "pwaIconUrl": { "type": "string" },
+        "pwaThemeColor": { "type": "string" },
+        "pwaBackgroundColor": { "type": "string" },
+        "appLogoLightUrl": { "type": "string" },
+        "appLogoDarkUrl": { "type": "string" },
+        "loginLogoLightUrl": { "type": "string" },
+        "loginLogoDarkUrl": { "type": "string" },
+        "loginCompanyName": { "type": "string" },
+        "loginWebsiteUrl": { "type": "string" },
+        "loginImprintUrl": { "type": "string" },
+        "loginPrivacyPolicyUrl": { "type": "string" },
+        "allowCustomJmapEndpoint": { "type": "boolean" },
+        "stalwartFeatures": { "type": "boolean" },
+        "extensionDirectoryUrl": { "type": "string" },
+        "logFormat": { "type": "string" },
+        "logLevel": { "type": "string" }
+      }
+    },
+    "oidc": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "clientId": { "type": "string" },
+        "issuerUrl": { "type": "string" },
+        "existingClientSecret": { "type": "string" },
+        "existingClientSecretKey": { "type": "string" }
+      }
+    },
+    "session": {
+      "type": "object",
+      "properties": {
+        "existingSecret": { "type": "string" },
+        "existingSecretKey": { "type": "string" },
+        "value": { "type": "string" }
+      }
+    },
+    "settingsSync": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "dataDir": { "type": "string" },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "storageClass": { "type": "string" },
+            "accessModes": { "type": "array" },
+            "size": { "type": "string" },
+            "annotations": { "type": "object" }
+          }
+        }
+      }
+    },
+    "extraEnv": { "type": "array" },
+    "extraEnvFrom": { "type": "array" },
+    "extraVolumes": { "type": "array" },
+    "extraVolumeMounts": { "type": "array" },
+    "podDisruptionBudget": { "type": "object" },
+    "autoscaling": { "type": "object" },
+    "metrics": { "type": "object" },
+    "networkPolicy": { "type": "object" }
+  }
+}

@@ -1,0 +1,38 @@
+apiVersion: v2
+name: bulwark-mail
+description: Helm chart for Bulwark Mail — a self-hosted JMAP webmail with native Ingress and multi-host TLS
+type: application
+version: 0.2.0
+appVersion: "1.6.0"
+icon: https://raw.githubusercontent.com/bulwarkmail/webmail/main/public/favicon.ico
+home: https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail
+sources:
+  - https://github.com/bulwarkmail/webmail
+  - https://github.com/l4gdev/helm-charts
+maintainers:
+  - name: L4G
+    email: contact@l4g.dev
+keywords:
+  - webmail
+  - jmap
+  - stalwart
+  - mail
+  - bulwark
+  - self-hosted
+kubeVersion: ">=1.23.0-0"
+annotations:
+  artifacthub.io/category: communication
+  artifacthub.io/license: AGPL-3.0
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail
+    - name: Bulwark GitHub
+      url: https://github.com/bulwarkmail/webmail
+  artifacthub.io/operator: "false"
+  artifacthub.io/prerelease: "false"
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/changes: |
+    - kind: changed
+      description: Bumped Bulwark to 1.6.0 (subpath deployment, image attachment thumbnails, mobile-friendly admin)
+    - kind: added
+      description: NetworkPolicy, ServiceMonitor, optional PVC for settings sync, values.schema.json, examples, README
