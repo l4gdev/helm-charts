@@ -1,78 +1,54 @@
 # L4G Helm Charts
 
-A collection of production-ready Helm charts for deploying various applications on Kubernetes.
+Production-ready Helm charts for self-hosted services.
+This branch is the published Helm repository at <https://l4gdev.github.io/helm-charts>.
 
-## Available Charts
+[![ArtifactHub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/l4g)](https://artifacthub.io/packages/search?repo=l4g)
 
-- **[overpass-api](charts/overpass-api)** - Helm chart for deploying Overpass API, a powerful read-only API for querying OpenStreetMap data
-
-## Usage
-
-### Add the Helm Repository
+## Add the repository
 
 ```bash
 helm repo add l4gdev https://l4gdev.github.io/helm-charts
 helm repo update
-```
-
-### Install a Chart
-
-```bash
-# Install Overpass API
-helm install overpass l4gdev/overpass-api
-
-# Install with custom values
-helm install overpass l4gdev/overpass-api -f custom-values.yaml
-```
-
-### Search Available Charts
-
-```bash
 helm search repo l4gdev
 ```
 
-## Development
+## Available charts
 
-### Prerequisites
+| Chart | App version | Source | What it deploys |
+| --- | --- | --- | --- |
+| `bulwark-mail` | 1.6.0 | [src](https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail) | [Bulwark](https://github.com/bulwarkmail/webmail) JMAP webmail. Native Ingress, multi-host TLS, OIDC, optional ServiceMonitor / NetworkPolicy / PVC for settings sync. |
+| `chibisafe` | latest | [src](https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe) | [Chibisafe](https://github.com/chibisafe/chibisafe) file vault and sharing platform. |
+| `ente-photos` | latest | [src](https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos) | [Ente Photos](https://github.com/ente-io/ente) end-to-end encrypted photo storage. Bundled museum API + photos / albums / accounts / auth / cast / share frontends; optional custom CA mount, ServiceMonitor, NetworkPolicy, PDB. |
+| `overpass-api` | latest | [src](https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api) | [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) — read-only OpenStreetMap query service. |
+| `stalwart-mail-ha` | 0.16.3 | [src](https://github.com/l4gdev/helm-charts/tree/main/charts/stalwart-mail-ha) | [Stalwart](https://github.com/stalwartlabs/stalwart) mail server (SMTP, IMAP, JMAP, CalDAV/CardDAV) with multi-replica HA. Postgres / MySQL / FoundationDB / RocksDB / SQLite data stores. |
 
-- Kubernetes 1.19+
-- Helm 3.2.0+
-
-### Testing Charts Locally
+## Install
 
 ```bash
-# Lint a chart
-helm lint charts/<chart-name>
-
-# Test template rendering
-helm template test charts/<chart-name>
-
-# Install locally with dry-run
-helm install test charts/<chart-name> --dry-run --debug
+helm install bulwark   l4gdev/bulwark-mail     -f my-values.yaml
+helm install chibisafe l4gdev/chibisafe        -f my-values.yaml
+helm install ente      l4gdev/ente-photos      -f my-values.yaml
+helm install overpass  l4gdev/overpass-api     -f my-values.yaml
+helm install mail      l4gdev/stalwart-mail-ha -f my-values.yaml
 ```
 
-## Contributing
+Every chart ships an `examples/` directory with reference values (minimal, HA, OIDC, LDAP, etc.) — start there.
 
-Contributions are welcome! Please:
+## Compatibility
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test the chart: `helm lint charts/<chart-name>`
-5. Submit a pull request
-
-## License
-
-Charts are licensed under the MIT License unless otherwise noted.
-
-Individual applications deployed by these charts may have different licenses.
+- Kubernetes 1.23+
+- Helm 3.8+
 
 ## Links
 
-- [Repository](https://github.com/l4gdev/helm-charts)
-- [Report Issues](https://github.com/l4gdev/helm-charts/issues)
+- [Source repository](https://github.com/l4gdev/helm-charts)
+- [Issues](https://github.com/l4gdev/helm-charts/issues)
 - [Artifact Hub](https://artifacthub.io/packages/search?repo=l4g)
 
-## Disclaimer
+## License
 
-The code is provided as-is with no warranties.
+Charts are MIT-licensed.
+The applications deployed by these charts have their own licenses (mostly AGPL-3.0).
+
+Provided as-is, no warranties.
