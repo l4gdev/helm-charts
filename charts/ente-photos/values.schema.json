@@ -260,7 +260,7 @@
           "properties": {
             "secret": {
               "type": "string",
-              "description": "JWT signing secret (32 random bytes, standard base64, auto-generated if empty)"
+              "description": "JWT signing secret (32 random bytes, URL-safe base64, auto-generated if empty)"
             }
           }
         },
