@@ -1,5 +1,53 @@
 apiVersion: v1
 entries:
+  bulwark-mail:
+  - annotations:
+      artifacthub.io/category: communication
+      artifacthub.io/changes: |
+        - kind: added
+          description: README + values.yaml comments now warn that `config.jmapServerUrl` is exposed to the browser via `/api/config` and must be publicly resolvable; cluster-internal Service names produce "Unable to reach the server"
+        - kind: added
+          description: README documents cross-origin requirements when webmail and JMAP server are on different hostnames (browser blocks credentialed requests without proper Allow-Credentials)
+        - kind: changed
+          description: Bumped Bulwark to 1.6.0 (subpath deployment, image attachment thumbnails, mobile-friendly admin)
+        - kind: added
+          description: NetworkPolicy, ServiceMonitor, optional PVC for settings sync, values.schema.json, examples, README
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/license: AGPL-3.0
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail
+        - name: Bulwark GitHub
+          url: https://github.com/bulwarkmail/webmail
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: 1.6.0
+    created: "2026-05-04T10:30:14.952109486Z"
+    description: Helm chart for Bulwark Mail — a self-hosted JMAP webmail with native
+      Ingress and multi-host TLS
+    digest: 706e0b8d14f8c5a30814813a4cebbef2750f4457092b7663640d3770a8989c1d
+    home: https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail
+    icon: https://raw.githubusercontent.com/bulwarkmail/webmail/main/public/favicon.ico
+    keywords:
+    - webmail
+    - jmap
+    - stalwart
+    - mail
+    - bulwark
+    - self-hosted
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: contact@l4g.dev
+      name: L4G
+    name: bulwark-mail
+    sources:
+    - https://github.com/bulwarkmail/webmail
+    - https://github.com/l4gdev/helm-charts
+    type: application
+    urls:
+    - https://l4gdev.github.io/helm-charts/charts/bulwark-mail-0.2.1.tgz
+    version: 0.2.1
   chibisafe:
   - annotations:
       artifacthub.io/category: storage
@@ -19,10 +67,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2025-12-19T14:34:07.311472457Z"
+    created: "2026-05-04T10:30:14.953107278Z"
     description: A Helm chart for Chibisafe - blazing fast file vault and sharing
       platform
-    digest: 7b726b82f4b17b5451dfda4c8c0647418dd9e0e6fa589a9d0a1507d6799d6b3e
+    digest: 1c8cbf249fd9c3f18fd1e313559b99bd9dfcddeabd85f2f97908f422da7d302f
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe
     icon: https://chibisafe.app/img/logo.svg
     keywords:
@@ -106,10 +154,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2025-12-19T14:34:07.313878957Z"
+    created: "2026-05-04T10:30:14.955081201Z"
     description: A Helm chart for Ente Photos - end-to-end encrypted photo storage
       and backup platform
-    digest: 8db6f4a7f593270de2566a067bb39c9a72fb648dee2ac0242fcd01e233333c1a
+    digest: 265da37cd2a8eb4316a120d633916236a9f1ff3e90b180b9a335b944954d489a
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos
     icon: https://ente.io/assets/ente-photos-icon-transparent.png
     keywords:
@@ -181,14 +229,14 @@ entries:
   freescout:
   - apiVersion: v2
     appVersion: php8.2-1.17.72
-    created: "2025-12-19T14:34:07.319304043Z"
+    created: "2026-05-04T10:30:14.959654023Z"
     dependencies:
     - condition: mariadb.enabled
       name: mariadb
       repository: https://charts.bitnami.com/bitnami
       version: ~11.x
     description: A Helm chart for Kubernetes
-    digest: 93e28ee80832b0c8180bc37515777e1687e5505d60600ec5e54f8b555c9298e2
+    digest: a5bf39cc4f36c654fe7f45e58f1cd03dbf7d98991fa53239319d354a060bd889
     icon: https://freescout.net/apple-touch-icon.png
     maintainers:
     - email: contact@l4g.dev
@@ -221,9 +269,9 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2025-12-19T14:34:07.320427633Z"
+    created: "2026-05-04T10:30:14.960734028Z"
     description: A Helm chart for deploying Overpass API - OpenStreetMap query service
-    digest: fe9c0b0f2bdf4a32e78096a0a43e2d8573ca16859bbb405ad3bee62f523bf125
+    digest: dd410ec3413079c8fff3dc9adb464426fa2f7924a0c06feeea2cf044b8b5413b
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
     icon: https://wiki.openstreetmap.org/w/images/b/b5/Overpass_API_logo.svg
     keywords:
@@ -339,4 +387,60 @@ entries:
     urls:
     - https://l4gdev.github.io/helm-charts/charts/overpass-api-0.1.0.tgz
     version: 0.1.0
-generated: "2025-12-19T14:34:07.310135366Z"
+  stalwart-mail-ha:
+  - annotations:
+      artifacthub.io/category: communication
+      artifacthub.io/changes: |
+        - kind: fixed
+          description: "config.json now uses Stalwart 0.16's `EnvironmentVariable`/`variableName` schema instead of legacy `EnvVar`/`envVar`"
+        - kind: fixed
+          description: "STALWART_RECOVERY_PASSWORD is rendered before STALWART_RECOVERY_ADMIN so K8s $(VAR) substitution resolves the password"
+        - kind: changed
+          description: "Fallback admin (STALWART_RECOVERY_ADMIN) is now wired whenever `recovery.adminPassword` or `recovery.existingSecret` is set, independent of `recovery.enabled` — this is the supported path for first-time login"
+        - kind: added
+          description: "values.yaml + examples + README cover cross-origin webmail (Bulwark) CORS setup with ingress-nginx annotations"
+        - kind: added
+          description: Initial release of Stalwart Mail HA chart for v0.16.x
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/license: AGPL-3.0
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/l4gdev/helm-charts/tree/main/charts/stalwart-mail-ha
+        - name: Stalwart Documentation
+          url: https://stalw.art/docs
+        - name: Stalwart GitHub
+          url: https://github.com/stalwartlabs/stalwart
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: 0.16.3
+    created: "2026-05-04T10:30:14.962149299Z"
+    description: Helm chart for Stalwart Mail Server (SMTP, IMAP, JMAP, CalDAV/CardDAV)
+      running multi-replica with all state on external backends
+    digest: e0dc6d737d077cba2599dee3475254a71dd71cb4f748f1bc2d7aa79a3c14f2a5
+    home: https://github.com/l4gdev/helm-charts/tree/main/charts/stalwart-mail-ha
+    icon: https://stalw.art/img/logo-stalwart.svg
+    keywords:
+    - stalwart
+    - mail
+    - smtp
+    - imap
+    - jmap
+    - caldav
+    - carddav
+    - mailserver
+    - ha
+    - self-hosted
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: contact@l4g.dev
+      name: L4G
+    name: stalwart-mail-ha
+    sources:
+    - https://github.com/stalwartlabs/stalwart
+    - https://github.com/l4gdev/helm-charts
+    type: application
+    urls:
+    - https://l4gdev.github.io/helm-charts/charts/stalwart-mail-ha-0.1.1.tgz
+    version: 0.1.1
+generated: "2026-05-04T10:30:14.950420001Z"
