@@ -6,6 +6,9 @@
 replicaCount: 3
 
 config:
+  # MUST be a publicly resolvable URL (browser fetches it directly).
+  # If on a different origin from the webmail host, the JMAP server must
+  # allow credentialed CORS for the webmail origin — see Stalwart chart README.
   jmapServerUrl: "https://mail.example.com"
   appName: "Example Mail"
   loginCompanyName: "Example Inc."

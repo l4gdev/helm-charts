@@ -72,11 +72,15 @@ spec:
           env:
             - name: STALWART_PUBLIC_URL
               value: {{ .Values.publicUrl | quote }}
-            {{- if .Values.recovery.enabled }}
-            - name: STALWART_RECOVERY_MODE
-              value: "1"
-            - name: STALWART_RECOVERY_ADMIN
-              value: {{ printf "%s:$(STALWART_RECOVERY_PASSWORD)" .Values.recovery.adminUser | quote }}
+            {{- /*
+            STALWART_RECOVERY_ADMIN ustawia fallback admin login dostępny przez /api/auth.
+            Mimo nazwy "recovery", działa też w normal mode (zob. authentication.rs:86).
+            STALWART_RECOVERY_MODE=1 to OSOBNY mechanizm wyłączający bootstrap defaults
+            i mail listenery — używaj tylko gdy chcesz awaryjnie wyjść z popsutego configu.
+            Chart wystawia fallback admin niezależnie od `recovery.enabled` żeby pierwszy
+            login do web UI był możliwy. PASSWORD musi być przed ADMIN dla K8s $(VAR) substitution.
+            */}}
+            {{- if or .Values.recovery.enabled .Values.recovery.adminPassword .Values.recovery.existingSecret }}
             - name: STALWART_RECOVERY_PASSWORD
               {{- if .Values.recovery.existingSecret }}
               valueFrom:
@@ -84,8 +88,14 @@ spec:
                   name: {{ .Values.recovery.existingSecret }}
                   key: {{ .Values.recovery.existingSecretKey }}
               {{- else }}
-              value: {{ required "recovery.adminPassword or recovery.existingSecret is required when recovery.enabled" .Values.recovery.adminPassword | quote }}
+              value: {{ .Values.recovery.adminPassword | quote }}
               {{- end }}
+            - name: STALWART_RECOVERY_ADMIN
+              value: {{ printf "%s:$(STALWART_RECOVERY_PASSWORD)" .Values.recovery.adminUser | quote }}
+            {{- end }}
+            {{- if .Values.recovery.enabled }}
+            - name: STALWART_RECOVERY_MODE
+              value: "1"
             {{- end }}
             {{- if eq .Values.dataStore.type "postgres" }}
             - name: STALWART_STORE_PG_PASSWORD

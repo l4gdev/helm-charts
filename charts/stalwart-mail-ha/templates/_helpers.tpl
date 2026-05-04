@@ -106,7 +106,7 @@ configured at runtime through `stalwart-cli apply`.
   {{- $_ := set $cfg "port" (int $pg.port) -}}
   {{- $_ := set $cfg "database" $pg.database -}}
   {{- $_ := set $cfg "authUsername" $pg.username -}}
-  {{- $_ := set $cfg "authSecret" (dict "@type" "EnvVar" "envVar" "STALWART_STORE_PG_PASSWORD") -}}
+  {{- $_ := set $cfg "authSecret" (dict "@type" "EnvironmentVariable" "variableName" "STALWART_STORE_PG_PASSWORD") -}}
   {{- $_ := set $cfg "useTls" $pg.useTls -}}
   {{- $_ := set $cfg "timeout" (int $pg.timeout) -}}
 {{- else if eq .Values.dataStore.type "mysql" -}}
@@ -116,7 +116,7 @@ configured at runtime through `stalwart-cli apply`.
   {{- $_ := set $cfg "port" (int $my.port) -}}
   {{- $_ := set $cfg "database" $my.database -}}
   {{- $_ := set $cfg "authUsername" $my.username -}}
-  {{- $_ := set $cfg "authSecret" (dict "@type" "EnvVar" "envVar" "STALWART_STORE_MYSQL_PASSWORD") -}}
+  {{- $_ := set $cfg "authSecret" (dict "@type" "EnvironmentVariable" "variableName" "STALWART_STORE_MYSQL_PASSWORD") -}}
   {{- $_ := set $cfg "maxAllowedPacket" (int $my.maxAllowedPacket) -}}
 {{- else if eq .Values.dataStore.type "foundationdb" -}}
   {{- $fdb := .Values.dataStore.foundationdb -}}

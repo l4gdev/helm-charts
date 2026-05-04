@@ -45,6 +45,14 @@ ingress:
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Cross-origin webmail (Bulwark on a separate hostname). Stalwart 0.16 only
+    # emits Allow-Origin: * without Allow-Credentials, so credentialed JMAP
+    # requests from the webmail are blocked. ingress-nginx clobbers the wildcard.
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://webmail.example.com"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS, PATCH, PUT, DELETE, HEAD"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type, Accept, X-Requested-With, Origin"
   hosts:
     - host: mail.example.com
       paths:

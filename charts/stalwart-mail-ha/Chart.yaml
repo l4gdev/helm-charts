@@ -2,7 +2,7 @@ apiVersion: v2
 name: stalwart-mail-ha
 description: Helm chart for Stalwart Mail Server (SMTP, IMAP, JMAP, CalDAV/CardDAV) running multi-replica with all state on external backends
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "0.16.3"
 icon: https://stalw.art/img/logo-stalwart.svg
 home: https://github.com/l4gdev/helm-charts/tree/main/charts/stalwart-mail-ha
@@ -38,5 +38,13 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |
+    - kind: fixed
+      description: "config.json now uses Stalwart 0.16's `EnvironmentVariable`/`variableName` schema instead of legacy `EnvVar`/`envVar`"
+    - kind: fixed
+      description: "STALWART_RECOVERY_PASSWORD is rendered before STALWART_RECOVERY_ADMIN so K8s $(VAR) substitution resolves the password"
+    - kind: changed
+      description: "Fallback admin (STALWART_RECOVERY_ADMIN) is now wired whenever `recovery.adminPassword` or `recovery.existingSecret` is set, independent of `recovery.enabled` — this is the supported path for first-time login"
+    - kind: added
+      description: "values.yaml + examples + README cover cross-origin webmail (Bulwark) CORS setup with ingress-nginx annotations"
     - kind: added
       description: Initial release of Stalwart Mail HA chart for v0.16.x

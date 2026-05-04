@@ -7,14 +7,20 @@ Replicas: {{ .Values.replicaCount }} ({{ .Values.dataStore.type }} data store)
 
 {{- if .Values.recovery.enabled }}
 
-WARNING: Recovery mode is ENABLED. Only the HTTP listener is up; mail ports are
-closed. Apply your initial configuration with stalwart-cli, then set
-recovery.enabled=false and run `helm upgrade` to bring mail listeners online.
+WARNING: Recovery mode is ENABLED (STALWART_RECOVERY_MODE=1). Bootstrap defaults
+are skipped, mail listeners stay closed, and only /api/auth, /jmap, and /healthz
+are served — the web UI is NOT loaded. Use this only to recover from a broken
+config; switch back to `recovery.enabled=false` for normal operation.
+{{- end }}
+{{- if or .Values.recovery.adminPassword .Values.recovery.existingSecret }}
 
-  export STALWART_URL=http://127.0.0.1:8080
-  export STALWART_USER={{ .Values.recovery.adminUser }}
-  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "stalwart-mail-ha.fullname" . }}-http 8080:{{ .Values.service.http.port }} &
-  stalwart-cli apply --file ./bootstrap.json
+Fallback admin login (works in normal mode too):
+  user:     {{ .Values.recovery.adminUser }}
+  password: {{ if .Values.recovery.existingSecret }}<secret/{{ .Values.recovery.existingSecret }}#{{ .Values.recovery.existingSecretKey }}>{{ else }}<set in values>{{ end }}
+
+This account exists only in the env var, not in the data store. After you create
+a real admin Account through the web UI, drop `recovery.adminPassword`/
+`recovery.existingSecret` from values.yaml and roll the deployment to remove it.
 {{- end }}
 
 1. Mail Service ({{ .Values.service.mail.type }}):
@@ -35,7 +41,8 @@ recovery.enabled=false and run `helm upgrade` to bring mail listeners online.
    open http://127.0.0.1:8080
 {{- end }}
 
-3. Configure the rest of Stalwart through the WebUI or `stalwart-cli apply`.
-   This chart only renders the data store wiring; SMTP listeners, blob store,
-   directory, DKIM, etc. live inside the database and are managed at runtime.
-   Reference: https://stalw.art/docs/management/cli
+3. Configure the rest of Stalwart through the admin web UI at /admin/.
+   This chart only renders the data store wiring on disk; SMTP listeners, blob
+   store, directory, DKIM, applications (web UI bundle), etc. live inside the
+   data store and are bootstrapped automatically on first run, then editable
+   through the admin UI. Reference: https://stalw.art/docs

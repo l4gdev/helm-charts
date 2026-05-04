@@ -133,7 +133,19 @@ startupProbe:
 # -----------------------------------------------------------------------------
 # JMAP_SERVER_URL is required. Everything else is optional.
 config:
-  # Mail server (required)
+  # Mail server (required).
+  #
+  # IMPORTANT: this URL is exposed to the browser through `/api/config` and the
+  # frontend fetches `${jmapServerUrl}/.well-known/jmap` and `${jmapServerUrl}/jmap/`
+  # directly. It MUST be a publicly resolvable URL — a cluster-internal Service
+  # name (e.g. `*.svc.cluster.local`) will produce "Unable to reach the server"
+  # in the browser even though the Bulwark pod can reach it.
+  #
+  # If `jmapServerUrl` is on a different origin from the webmail, the JMAP
+  # server must allow credentialed CORS for the webmail origin. Stalwart 0.16
+  # does not emit Allow-Credentials by default; see the Stalwart chart README
+  # for the ingress-nginx CORS annotation set or the `usePermissiveCors=false`
+  # Stalwart-side configuration.
   jmapServerUrl: "https://mail.example.com"
   hostname: "0.0.0.0"
   port: 3000

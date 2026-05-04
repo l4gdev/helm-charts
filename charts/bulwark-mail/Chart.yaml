@@ -2,7 +2,7 @@ apiVersion: v2
 name: bulwark-mail
 description: Helm chart for Bulwark Mail — a self-hosted JMAP webmail with native Ingress and multi-host TLS
 type: application
-version: 0.2.0
+version: 0.2.1
 appVersion: "1.6.0"
 icon: https://raw.githubusercontent.com/bulwarkmail/webmail/main/public/favicon.ico
 home: https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail
@@ -32,6 +32,10 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |
+    - kind: added
+      description: README + values.yaml comments now warn that `config.jmapServerUrl` is exposed to the browser via `/api/config` and must be publicly resolvable; cluster-internal Service names produce "Unable to reach the server"
+    - kind: added
+      description: README documents cross-origin requirements when webmail and JMAP server are on different hostnames (browser blocks credentialed requests without proper Allow-Credentials)
     - kind: changed
       description: Bumped Bulwark to 1.6.0 (subpath deployment, image attachment thumbnails, mobile-friendly admin)
     - kind: added

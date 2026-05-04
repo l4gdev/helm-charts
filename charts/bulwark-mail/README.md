@@ -49,6 +49,17 @@ helm install bulwark l4g/bulwark-mail \
   -f charts/bulwark-mail/examples/values-minimal.yaml
 ```
 
+## JMAP server URL
+
+`config.jmapServerUrl` is exposed verbatim to the browser through `/api/config`. The frontend then fetches `${jmapServerUrl}/.well-known/jmap` and `${jmapServerUrl}/jmap/` directly — Bulwark does **not** server-side proxy the bulk of the JMAP traffic.
+
+This has two practical consequences:
+
+- The URL must be publicly resolvable. A cluster-internal Service name (`*.svc.cluster.local`) makes the browser fail with `Unable to reach the server` even though the Bulwark pod can reach it.
+- If the webmail and the JMAP server are on different origins, the JMAP server must permit credentialed CORS for the webmail origin (`Access-Control-Allow-Origin: <webmail>` plus `Access-Control-Allow-Credentials: true`). Stalwart 0.16 does not emit `Allow-Credentials` on its own; either override at the ingress (see the stalwart-mail-ha chart README) or set `usePermissiveCors=false` plus custom `responseHeaders` in Stalwart's admin UI.
+
+A same-origin layout — webmail under `https://mail.example.com/webmail/`, Stalwart at the host root — sidesteps CORS entirely. Set `NEXT_PUBLIC_BASE_PATH=/webmail` via `extraEnv` and point the ingress at that path.
+
 ## Values
 
 ### Top-level

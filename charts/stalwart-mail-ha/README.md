@@ -61,24 +61,33 @@ For production HA, start with `examples/values-ha.yaml` (Postgres + S3 + Redis +
 
 ## First-boot bootstrap
 
-For a brand-new deployment, run with `recovery.enabled=true`. Only the HTTP listener will be exposed and a temporary admin is provisioned. Apply your configuration and disable recovery mode:
+Stalwart 0.16 stores its configuration inside the data store and auto-bootstraps roles, listeners, queues, and the web UI Application bundle on first start. It does NOT create an initial admin Account, so you must inject a fallback admin via `STALWART_RECOVERY_ADMIN`. The chart wires this for you whenever `recovery.adminPassword` (or `recovery.existingSecret`) is set, regardless of `recovery.enabled`.
 
 ```bash
 helm install mail l4g/stalwart-mail-ha \
-  --set recovery.enabled=true \
   --set recovery.adminPassword=ChangeMe \
   -f my-values.yaml
 
-kubectl port-forward svc/mail-stalwart-mail-ha-http 8080:8080 &
-export STALWART_URL=http://127.0.0.1:8080
-export STALWART_USER=admin
-export STALWART_PASSWORD=ChangeMe
-stalwart-cli apply --file my-bootstrap-plan.json
-
-helm upgrade mail l4g/stalwart-mail-ha \
-  --set recovery.enabled=false \
-  -f my-values.yaml
+# Wait for the pod to download the web UI bundle from
+# github.com/stalwartlabs/webui/releases/latest/download/webui.zip,
+# then log in as admin/ChangeMe at:
+#   https://<your-ingress-host>/admin/
 ```
+
+Inside the admin UI you create real Accounts, domains, directories, blob/lookup backends, and so on. Once a real admin Account exists you can drop `recovery.adminPassword` from the values file and roll the deployment to remove the fallback.
+
+`recovery.enabled=true` is a separate emergency mode that sets `STALWART_RECOVERY_MODE=1`. It skips the bootstrap defaults and only exposes `/api/auth`, `/jmap`, and `/healthz` — the web UI is NOT loaded. Use it to recover from a misconfigured data store, not for first boot.
+
+## Cross-origin webmail (Bulwark, JMAP clients)
+
+Browsers reject credentialed CORS requests when the JMAP server replies with `Access-Control-Allow-Origin: *`. Stalwart 0.16 emits exactly that and has no built-in option for `Allow-Credentials: true`, so a webmail running on a different hostname will fail with `The server is reachable but is blocking cross-origin requests`.
+
+Two ways to make it work, in order of preference:
+
+1. **Override at the ingress.** Add `nginx.ingress.kubernetes.io/enable-cors: "true"` plus `cors-allow-origin`, `cors-allow-credentials`, `cors-allow-methods`, and `cors-allow-headers` annotations to the Stalwart ingress. ingress-nginx handles preflight itself and replaces Stalwart's wildcard reply with a per-origin one. See `examples/values-ha.yaml` for the full annotation set.
+2. **Configure it in Stalwart.** In the admin UI go to Settings → HTTP, set `usePermissiveCors=false`, and add `responseHeaders` containing `Access-Control-Allow-Origin: <webmail-origin>` and `Access-Control-Allow-Credentials: true`. The values live in the data store along with the rest of the config.
+
+A same-origin deployment (webmail on `https://mail.example.com/webmail/`, Stalwart on `https://mail.example.com/`) avoids the issue entirely. Bulwark supports a subpath via `NEXT_PUBLIC_BASE_PATH`.
 
 ## Values
 

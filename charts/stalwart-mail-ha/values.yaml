@@ -135,14 +135,33 @@ service:
     annotations: {}
 
 # -----------------------------------------------------------------------------
-# Ingress (HTTP only)
+# Ingress (HTTP only — admin web UI, JMAP, autoconfig)
 # -----------------------------------------------------------------------------
+# Cross-origin webmail clients (Bulwark, JMAP webmails on a separate hostname)
+# need credentialed CORS. Stalwart 0.16 only emits `Access-Control-Allow-Origin: *`
+# without `Allow-Credentials: true`, which browsers refuse for requests carrying
+# Authorization headers. Two ways to fix it:
+#
+#   1. Override at the ingress: add CORS annotations like the commented block
+#      below. ingress-nginx handles preflight itself and clobbers Stalwart's
+#      wildcard with a per-origin reply that includes Allow-Credentials.
+#   2. Configure it in Stalwart's admin UI: Settings → HTTP → set
+#      `usePermissiveCors=false` and add `responseHeaders` containing
+#      `Access-Control-Allow-Origin: <webmail-origin>` and
+#      `Access-Control-Allow-Credentials: true`. This is the production-grade
+#      path because the values live in the data store with the rest of the config.
 ingress:
   enabled: false
   className: ""
   annotations: {}
     # cert-manager.io/cluster-issuer: letsencrypt-prod
     # nginx.ingress.kubernetes.io/proxy-body-size: 256m
+    # Cross-origin webmail support (uncomment + set origin):
+    # nginx.ingress.kubernetes.io/enable-cors: "true"
+    # nginx.ingress.kubernetes.io/cors-allow-origin: "https://webmail.example.com"
+    # nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    # nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS, PATCH, PUT, DELETE, HEAD"
+    # nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type, Accept, X-Requested-With, Origin"
   hosts:
     - host: mail.example.com
       paths:
@@ -222,12 +241,25 @@ dataStore:
       annotations: {}
 
 # -----------------------------------------------------------------------------
-# Recovery / first-boot bootstrap
+# Fallback admin (`STALWART_RECOVERY_ADMIN`) + recovery mode
 # -----------------------------------------------------------------------------
-# Set recovery.enabled=true for the first deployment so the server starts in
-# recovery mode and exposes /jmap on :8080 with a temporary admin. After
-# applying your initial plan via `stalwart-cli apply`, set this back to false
-# and roll the deployment.
+# Stalwart 0.16 stores all admin/user accounts in the data store. The default
+# bootstrap inserts roles, listeners, and queues, but it does NOT create an
+# initial admin Account — without the env-var-based fallback admin there is
+# no way to log into the freshly deployed web UI.
+#
+# Setting `adminPassword` (or `existingSecret`) ALWAYS injects the fallback
+# admin via `STALWART_RECOVERY_ADMIN=<adminUser>:<password>`. The variable is
+# honored in normal mode too (despite the "recovery" name); see
+# `crates/common/src/auth/authentication.rs:86`. Login via
+# `https://<host>/admin/` as `<adminUser>`/`<password>` works on the first
+# boot. After you create a real admin Account through the web UI you may
+# remove these values to drop the fallback.
+#
+# `recovery.enabled=true` is a SEPARATE emergency mode — it sets
+# `STALWART_RECOVERY_MODE=1`, skips bootstrap defaults, and only exposes
+# `/api/auth`, `/jmap`, and `/healthz` (web UI applications are NOT loaded).
+# Use it only to recover from a broken configuration, not for first boot.
 recovery:
   enabled: false
   adminUser: admin

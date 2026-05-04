@@ -24,8 +24,11 @@ listeners:
   pop3s:
     enabled: false
 
-# First boot: enable recovery, then disable after applying the bootstrap plan.
+# First-time login uses STALWART_RECOVERY_ADMIN as a fallback admin (works in
+# normal mode too, despite the name). Stalwart does not auto-create an admin
+# Account on first boot, so without this you cannot log into /admin/.
+# Replace `adminPassword` with `existingSecret` for real deployments.
 recovery:
-  enabled: true
+  enabled: false
   adminUser: admin
   adminPassword: ChangeMeOnFirstBoot
