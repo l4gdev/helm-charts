@@ -23,10 +23,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: 1.6.0
-    created: "2026-05-04T10:30:14.952109486Z"
+    created: "2026-05-04T10:34:50.63142743Z"
     description: Helm chart for Bulwark Mail — a self-hosted JMAP webmail with native
       Ingress and multi-host TLS
-    digest: 706e0b8d14f8c5a30814813a4cebbef2750f4457092b7663640d3770a8989c1d
+    digest: aae4639993b4d757bc3f37ee12af75083562db7ee51643e74aba93d7d8ac7cb1
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail
     icon: https://raw.githubusercontent.com/bulwarkmail/webmail/main/public/favicon.ico
     keywords:
@@ -67,10 +67,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2026-05-04T10:30:14.953107278Z"
+    created: "2026-05-04T10:34:50.632488458Z"
     description: A Helm chart for Chibisafe - blazing fast file vault and sharing
       platform
-    digest: 1c8cbf249fd9c3f18fd1e313559b99bd9dfcddeabd85f2f97908f422da7d302f
+    digest: 082b47aa8fd2bc32eaa8e11487fbeaa03849f0f568a88232eab2aa57b920d83e
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe
     icon: https://chibisafe.app/img/logo.svg
     keywords:
@@ -154,10 +154,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2026-05-04T10:30:14.955081201Z"
+    created: "2026-05-04T10:34:50.634509505Z"
     description: A Helm chart for Ente Photos - end-to-end encrypted photo storage
       and backup platform
-    digest: 265da37cd2a8eb4316a120d633916236a9f1ff3e90b180b9a335b944954d489a
+    digest: 8d9b289cdba565dc7db537e8f0119bc69c677ff36c8c03133e4c0e04e2decf8a
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos
     icon: https://ente.io/assets/ente-photos-icon-transparent.png
     keywords:
@@ -229,14 +229,14 @@ entries:
   freescout:
   - apiVersion: v2
     appVersion: php8.2-1.17.72
-    created: "2026-05-04T10:30:14.959654023Z"
+    created: "2026-05-04T10:34:50.638780253Z"
     dependencies:
     - condition: mariadb.enabled
       name: mariadb
       repository: https://charts.bitnami.com/bitnami
       version: ~11.x
     description: A Helm chart for Kubernetes
-    digest: a5bf39cc4f36c654fe7f45e58f1cd03dbf7d98991fa53239319d354a060bd889
+    digest: dee21e7e249e75e5bf60808573e37b57de92d9d6bb8cab3b02354696327e68b6
     icon: https://freescout.net/apple-touch-icon.png
     maintainers:
     - email: contact@l4g.dev
@@ -269,9 +269,9 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2026-05-04T10:30:14.960734028Z"
+    created: "2026-05-04T10:34:50.639891915Z"
     description: A Helm chart for deploying Overpass API - OpenStreetMap query service
-    digest: dd410ec3413079c8fff3dc9adb464426fa2f7924a0c06feeea2cf044b8b5413b
+    digest: 3fcecda8615ce5f02e9f07af617bd93d5ffc0fe6a16065989a94a763376548c5
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
     icon: https://wiki.openstreetmap.org/w/images/b/b5/Overpass_API_logo.svg
     keywords:
@@ -414,10 +414,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: 0.16.3
-    created: "2026-05-04T10:30:14.962149299Z"
+    created: "2026-05-04T10:34:50.641259919Z"
     description: Helm chart for Stalwart Mail Server (SMTP, IMAP, JMAP, CalDAV/CardDAV)
       running multi-replica with all state on external backends
-    digest: e0dc6d737d077cba2599dee3475254a71dd71cb4f748f1bc2d7aa79a3c14f2a5
+    digest: 05455d7e06d0d928f318894383e4a7fa856a731f11001fb05366e0d4aa44b89f
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/stalwart-mail-ha
     icon: https://stalw.art/img/logo-stalwart.svg
     keywords:
@@ -443,4 +443,4 @@ entries:
     urls:
     - https://l4gdev.github.io/helm-charts/charts/stalwart-mail-ha-0.1.1.tgz
     version: 0.1.1
-generated: "2026-05-04T10:30:14.950420001Z"
+generated: "2026-05-04T10:34:50.629873272Z"
