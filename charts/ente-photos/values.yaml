@@ -136,20 +136,23 @@ museum:
       # -- Maximum idle connections
       maxIdleConns: 5
 
-    # Application endpoints (update these to match your ingress configuration)
+    # Application endpoints. When left empty, the chart auto-derives them from
+    # the matching `web.<app>.ingress.hosts[0]` (publicAlbums ← web.albums,
+    # publicLocker ← web.share, accounts ← web.accounts). Set explicitly only
+    # when you point a domain elsewhere (e.g. another cluster).
     apps:
-      # -- Public albums endpoint URL
-      publicAlbums: "https://albums.ente.local"
+      # -- Public albums endpoint URL (auto-derived from web.albums.ingress)
+      publicAlbums: ""
       # -- Embed albums endpoint URL
-      embedAlbums: "https://embed.ente.local"
-      # -- Public locker (share) endpoint URL
-      publicLocker: "https://share.ente.local"
+      embedAlbums: ""
+      # -- Public locker (share) endpoint URL (auto-derived from web.share.ingress)
+      publicLocker: ""
       # -- Cast endpoint URL
-      cast: "https://cast.ente.local"
-      # -- Accounts endpoint URL
-      accounts: "https://accounts.ente.local"
+      cast: ""
+      # -- Accounts endpoint URL (auto-derived from web.accounts.ingress)
+      accounts: ""
       # -- Family portal URL
-      family: "https://family.ente.local"
+      family: ""
       # -- Custom CNAME domain
       cname: ""
 
@@ -217,6 +220,21 @@ museum:
       size: 1Gi
       # -- Annotations for data PVC
       annotations: {}
+
+  # Custom CA bundle for outbound TLS (S3, SMTP, OIDC, etc.).
+  # Useful when the upstream service uses a self-signed or private-CA cert.
+  # Provide a Secret OR ConfigMap (not both) with PEM-encoded certs at `key`.
+  # The chart mounts it at /etc/ssl/certs/custom-ca-bundle.crt and points
+  # SSL_CERT_FILE at it; Go's crypto/x509 picks it up automatically.
+  customCA:
+    # -- Mount a custom CA bundle for outbound TLS verification
+    enabled: false
+    # -- Existing Secret name containing the PEM bundle
+    existingSecret: ""
+    # -- Existing ConfigMap name containing the PEM bundle (alternative to existingSecret)
+    existingConfigMap: ""
+    # -- Key inside the Secret/ConfigMap holding the PEM data
+    key: "ca.crt"
 
   # Museum service configuration
   service:
@@ -558,7 +576,8 @@ web:
     replicaCount: 1
 
     image: {}
-    containerPort: 3000
+    # -- Container port. 3003 = auth entrypoint inside ghcr.io/ente-io/web.
+    containerPort: 3003
     resources: {}
     env: []
     envFrom: []
@@ -601,7 +620,8 @@ web:
     replicaCount: 1
 
     image: {}
-    containerPort: 3000
+    # -- Container port. 3001 = accounts entrypoint inside ghcr.io/ente-io/web.
+    containerPort: 3001
     resources: {}
     env: []
     envFrom: []
@@ -644,7 +664,8 @@ web:
     replicaCount: 1
 
     image: {}
-    containerPort: 3000
+    # -- Container port. 3004 = cast entrypoint inside ghcr.io/ente-io/web.
+    containerPort: 3004
     resources: {}
     env: []
     envFrom: []
@@ -678,16 +699,69 @@ web:
       tls: []
 
   # ---------------------------------------------------------------------------
-  # Share Web App
+  # Albums Web App (public album sharing — what `museum.config.apps.publicAlbums` points at)
   # ---------------------------------------------------------------------------
-  share:
-    # -- Enable Share web app (public sharing)
+  # The ghcr.io/ente-io/web image bundles every Ente frontend on a different
+  # internal port. Public album sharing is served on port 3002. When a user
+  # generates a public album link, the photos web app produces a URL like
+  # https://albums.example.com/?t=TOKEN — that domain MUST route to this
+  # deployment for the album to render. Pointing it anywhere else lands on a
+  # login screen (which is what the photos app, port 3000, shows by default).
+  albums:
+    # -- Enable Albums web app
     enabled: true
     # -- Number of replicas
     replicaCount: 1
 
     image: {}
-    containerPort: 3000
+    # -- Container port. 3002 = albums entrypoint inside ghcr.io/ente-io/web.
+    containerPort: 3002
+    resources: {}
+    env: []
+    envFrom: []
+    extraVolumeMounts: []
+    extraVolumes: []
+    securityContext: {}
+    podSecurityContext: {}
+    podAnnotations: {}
+    podLabels: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+    config:
+      extra: {}
+
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts:
+        - host: albums.ente.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+
+  # ---------------------------------------------------------------------------
+  # Share Web App (public file/locker sharing — `museum.config.apps.publicLocker`)
+  # ---------------------------------------------------------------------------
+  # NOT to be confused with public album sharing — this serves the locker app
+  # (port 3005) used for file shares from Ente's mobile/desktop client.
+  share:
+    # -- Enable Share web app (public file/locker sharing)
+    enabled: false
+    # -- Number of replicas
+    replicaCount: 1
+
+    image: {}
+    # -- Container port. 3005 = share/locker entrypoint inside ghcr.io/ente-io/web.
+    containerPort: 3005
     resources: {}
     env: []
     envFrom: []

@@ -125,12 +125,12 @@
               "type": "object",
               "description": "Application endpoint URLs",
               "properties": {
-                "publicAlbums": { "type": "string", "format": "uri" },
-                "embedAlbums": { "type": "string", "format": "uri" },
-                "publicLocker": { "type": "string", "format": "uri" },
-                "cast": { "type": "string", "format": "uri" },
-                "accounts": { "type": "string", "format": "uri" },
-                "family": { "type": "string", "format": "uri" },
+                "publicAlbums": { "type": "string" },
+                "embedAlbums": { "type": "string" },
+                "publicLocker": { "type": "string" },
+                "cast": { "type": "string" },
+                "accounts": { "type": "string" },
+                "family": { "type": "string" },
                 "cname": { "type": "string" }
               }
             },
@@ -194,6 +194,16 @@
           "type": "object",
           "properties": {
             "data": { "$ref": "#/$defs/persistence" }
+          }
+        },
+        "customCA": {
+          "type": "object",
+          "description": "Mount a private CA bundle for outbound TLS verification",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "existingSecret": { "type": "string" },
+            "existingConfigMap": { "type": "string" },
+            "key": { "type": "string" }
           }
         },
         "service": { "$ref": "#/$defs/service" },
@@ -353,6 +363,7 @@
         "auth": { "$ref": "#/$defs/webComponent" },
         "accounts": { "$ref": "#/$defs/webComponent" },
         "cast": { "$ref": "#/$defs/webComponent" },
+        "albums": { "$ref": "#/$defs/webComponent" },
         "share": { "$ref": "#/$defs/webComponent" }
       }
     },

@@ -2,9 +2,9 @@ apiVersion: v2
 name: bulwark-mail
 description: Helm chart for Bulwark Mail — a self-hosted JMAP webmail with native Ingress and multi-host TLS
 type: application
-version: 0.2.1
+version: 0.2.2
 appVersion: "1.6.0"
-icon: https://raw.githubusercontent.com/bulwarkmail/webmail/main/public/favicon.ico
+icon: https://raw.githubusercontent.com/bulwarkmail/webmail/main/public/icon-192x192.png
 home: https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail
 sources:
   - https://github.com/bulwarkmail/webmail
@@ -21,7 +21,7 @@ keywords:
   - self-hosted
 kubeVersion: ">=1.23.0-0"
 annotations:
-  artifacthub.io/category: communication
+  artifacthub.io/category: networking
   artifacthub.io/license: AGPL-3.0
   artifacthub.io/links: |
     - name: Chart Source
@@ -32,6 +32,8 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |
+    - kind: fixed
+      description: Replaced 404 favicon icon URL with valid icon-192x192.png and switched category from invalid "communication" to "networking" so ArtifactHub indexing succeeds
     - kind: added
       description: README + values.yaml comments now warn that `config.jmapServerUrl` is exposed to the browser via `/api/config` and must be publicly resolvable; cluster-internal Service names produce "Unable to reach the server"
     - kind: added

@@ -1,6 +1,6 @@
-{{- if .Values.web.photos.enabled }}
-{{- $component := "photos" }}
-{{- $componentConfig := .Values.web.photos }}
+{{- if .Values.web.albums.enabled }}
+{{- $component := "albums" }}
+{{- $componentConfig := .Values.web.albums }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,13 +14,17 @@ metadata:
   {{- end }}
 data:
   .env.local: |
-    # Ente Photos Web App Configuration
+    # Ente Albums Web App Configuration
     NEXT_PUBLIC_ENTE_ENDPOINT={{ include "ente-photos.museum.apiUrl" . }}
-    {{- $albums := default (include "ente-photos.web.albumsUrl" .) $componentConfig.config.albumsEndpoint }}
-    {{- if $albums }}
-    NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT={{ $albums }}
+    {{- with (include "ente-photos.web.photosUrl" .) }}
+    NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT={{ . }}
     {{- end }}
+    {{- with (include "ente-photos.web.albumsUrl" .) }}
+    NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT={{ . }}
+    {{- end }}
+    {{- if $componentConfig.config }}
     {{- range $key, $value := $componentConfig.config.extra }}
     {{ $key }}={{ $value }}
+    {{- end }}
     {{- end }}
 {{- end }}

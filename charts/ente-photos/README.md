@@ -216,6 +216,64 @@ credentials:
 
 ## Web Frontends
 
+The `ghcr.io/ente-io/web` image bundles every Ente frontend on a separate internal port.
+The chart maps each `web.<app>` block to the right port; do not change `containerPort` unless you know what you are doing.
+
+| `web.<app>` | Internal port | Purpose |
+| --- | --- | --- |
+| `photos` | 3000 | Main photos web app |
+| `accounts` | 3001 | Account management |
+| `albums` | 3002 | **Public album sharing — what `museum.config.apps.publicAlbums` must point at** |
+| `auth` | 3003 | 2FA codes (Ente Auth) |
+| `cast` | 3004 | Chromecast |
+| `share` | 3005 | Public file/locker sharing (via Ente desktop/mobile clients) |
+
+### Public album sharing (issue #2)
+
+When a user creates a public album link, the photos web app produces a URL like `https://albums.example.com/?t=TOKEN`.
+That domain MUST route to the `web.albums` deployment (port 3002).
+Pointing it at `web.photos` (the default photos app on port 3000) lands users on a login screen, which is what older deployments of this chart did.
+
+Minimum config that makes album sharing work:
+
+```yaml
+web:
+  photos:
+    ingress:
+      enabled: true
+      hosts: [{ host: photos.example.com, paths: [{ path: /, pathType: Prefix }] }]
+      tls: [{ secretName: photos-tls, hosts: [photos.example.com] }]
+  albums:
+    enabled: true
+    ingress:
+      enabled: true
+      hosts: [{ host: albums.example.com, paths: [{ path: /, pathType: Prefix }] }]
+      tls: [{ secretName: albums-tls, hosts: [albums.example.com] }]
+```
+
+`museum.config.apps.publicAlbums` is auto-derived from `web.albums.ingress.hosts[0].host`, so you do not need to set it manually unless your albums domain lives outside the cluster.
+
+### Custom CA for outbound TLS (issue #1)
+
+When the museum talks to S3 or SMTP over TLS with a private CA (self-hosted MinIO, internal cert authority), drop the CA bundle into a Secret:
+
+```bash
+kubectl create secret generic ente-custom-ca --from-file=ca.crt=./my-ca.crt
+```
+
+…and enable it:
+
+```yaml
+museum:
+  customCA:
+    enabled: true
+    existingSecret: ente-custom-ca
+    key: ca.crt
+```
+
+The chart mounts it at `/etc/ssl/certs/custom-ca-bundle.crt` and sets `SSL_CERT_FILE` to that path.
+Go's `crypto/x509` reads `SSL_CERT_FILE` automatically, so the museum will trust certs signed by this CA on subsequent S3/SMTP requests without an init container or `update-ca-certificates` rebuild.
+
 ### Disabling Frontends
 
 If you only need the API server (e.g., using mobile apps only):
@@ -227,6 +285,8 @@ web:
   auth:
     enabled: false
   accounts:
+    enabled: false
+  albums:
     enabled: false
   share:
     enabled: false
