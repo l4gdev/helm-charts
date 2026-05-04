@@ -20,7 +20,7 @@ maintainers:
   - name: L4G
     email: contact@l4g.dev
 type: application
-version: 0.1.1
+version: 0.2.0
 appVersion: "latest"
 
 annotations:
@@ -37,6 +37,16 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |
+    - kind: added
+      description: New web.albums component (port 3002) so public album sharing works (#2)
+    - kind: added
+      description: museum.customCA for mounting a private CA bundle for S3/SMTP TLS verification (#1)
+    - kind: fixed
+      description: Web frontends no longer all default to port 3000 — accounts/auth/cast/share/albums each use the correct entrypoint port inside ghcr.io/ente-io/web
+    - kind: changed
+      description: museum.config.apps.publicAlbums, publicLocker, accounts auto-derive from the matching web ingress when not set explicitly
+    - kind: fixed
+      description: JWT secret is now generated and documented as URL-safe base64 to match Ente's b64.URLEncoding decoder (#3)
     - kind: added
       description: Added values schema file, fixed logo url
     - kind: added

@@ -38,30 +38,32 @@ data:
       {{- end }}
 
     # Application Endpoints
-    {{- with .Values.museum.config.apps }}
+    {{- $apps := .Values.museum.config.apps }}
+    {{- $publicAlbums := default (include "ente-photos.web.albumsUrl" .) $apps.publicAlbums }}
+    {{- $publicLocker := default (include "ente-photos.web.shareUrl" .) $apps.publicLocker }}
+    {{- $accounts := default (include "ente-photos.web.accountsUrl" .) $apps.accounts }}
     apps:
-      {{- if .publicAlbums }}
-      public-albums: {{ .publicAlbums | quote }}
+      {{- if $publicAlbums }}
+      public-albums: {{ $publicAlbums | quote }}
       {{- end }}
-      {{- if .embedAlbums }}
-      embed-albums: {{ .embedAlbums | quote }}
+      {{- if $apps.embedAlbums }}
+      embed-albums: {{ $apps.embedAlbums | quote }}
       {{- end }}
-      {{- if .publicLocker }}
-      public-locker: {{ .publicLocker | quote }}
+      {{- if $publicLocker }}
+      public-locker: {{ $publicLocker | quote }}
       {{- end }}
-      {{- if .cast }}
-      cast: {{ .cast | quote }}
+      {{- if $apps.cast }}
+      cast: {{ $apps.cast | quote }}
       {{- end }}
-      {{- if .accounts }}
-      accounts: {{ .accounts | quote }}
+      {{- if $accounts }}
+      accounts: {{ $accounts | quote }}
       {{- end }}
-      {{- if .family }}
-      family: {{ .family | quote }}
+      {{- if $apps.family }}
+      family: {{ $apps.family | quote }}
       {{- end }}
-      {{- if .cname }}
-      cname: {{ .cname | quote }}
+      {{- if $apps.cname }}
+      cname: {{ $apps.cname | quote }}
       {{- end }}
-    {{- end }}
 
     # Internal Settings
     internal:

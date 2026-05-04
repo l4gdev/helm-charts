@@ -2,9 +2,9 @@ apiVersion: v2
 name: stalwart-mail-ha
 description: Helm chart for Stalwart Mail Server (SMTP, IMAP, JMAP, CalDAV/CardDAV) running multi-replica with all state on external backends
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "0.16.3"
-icon: https://stalw.art/img/logo-stalwart.svg
+icon: https://raw.githubusercontent.com/stalwartlabs/stalwart/main/img/logo-red.svg
 home: https://github.com/l4gdev/helm-charts/tree/main/charts/stalwart-mail-ha
 sources:
   - https://github.com/stalwartlabs/stalwart
@@ -25,7 +25,7 @@ maintainers:
     email: contact@l4g.dev
 kubeVersion: ">=1.23.0-0"
 annotations:
-  artifacthub.io/category: communication
+  artifacthub.io/category: networking
   artifacthub.io/license: AGPL-3.0
   artifacthub.io/links: |
     - name: Chart Source
@@ -38,6 +38,8 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |
+    - kind: fixed
+      description: Replaced 404 stalw.art logo URL with raw GitHub logo-red.svg and switched category from invalid "communication" to "networking" so ArtifactHub indexing succeeds
     - kind: fixed
       description: "config.json now uses Stalwart 0.16's `EnvironmentVariable`/`variableName` schema instead of legacy `EnvVar`/`envVar`"
     - kind: fixed

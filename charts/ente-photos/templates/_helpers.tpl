@@ -221,9 +221,23 @@ Photos web app URL
 {{- end }}
 
 {{/*
-Albums/Share web app URL
+Public Albums web app URL — what museum.config.apps.publicAlbums must point at.
 */}}
 {{- define "ente-photos.web.albumsUrl" -}}
+{{- if and .Values.web.albums.enabled .Values.web.albums.ingress.enabled }}
+{{- $host := (index .Values.web.albums.ingress.hosts 0).host }}
+{{- if .Values.web.albums.ingress.tls }}
+{{- printf "https://%s" $host }}
+{{- else }}
+{{- printf "http://%s" $host }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Public Locker (share) web app URL — what museum.config.apps.publicLocker points at.
+*/}}
+{{- define "ente-photos.web.shareUrl" -}}
 {{- if and .Values.web.share.enabled .Values.web.share.ingress.enabled }}
 {{- $host := (index .Values.web.share.ingress.hosts 0).host }}
 {{- if .Values.web.share.ingress.tls }}

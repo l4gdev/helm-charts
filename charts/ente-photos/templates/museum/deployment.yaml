@@ -69,6 +69,10 @@ spec:
                 secretKeyRef:
                   name: {{ include "ente-photos.postgresql.secretName" . }}
                   key: {{ include "ente-photos.postgresql.passwordKey" . }}
+            {{- if .Values.museum.customCA.enabled }}
+            - name: SSL_CERT_FILE
+              value: /etc/ssl/certs/custom-ca-bundle.crt
+            {{- end }}
             {{- with .Values.museum.env }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -93,6 +97,12 @@ spec:
             - name: credentials
               mountPath: /credentials
               readOnly: true
+            {{- if .Values.museum.customCA.enabled }}
+            - name: custom-ca
+              mountPath: /etc/ssl/certs/custom-ca-bundle.crt
+              subPath: {{ .Values.museum.customCA.key }}
+              readOnly: true
+            {{- end }}
             {{- if .Values.museum.persistence.data.enabled }}
             - name: data
               mountPath: /data
@@ -148,6 +158,18 @@ spec:
         - name: credentials
           secret:
             secretName: {{ include "ente-photos.credentials.secretName" . }}
+        {{- if .Values.museum.customCA.enabled }}
+        - name: custom-ca
+          {{- if .Values.museum.customCA.existingSecret }}
+          secret:
+            secretName: {{ .Values.museum.customCA.existingSecret }}
+          {{- else if .Values.museum.customCA.existingConfigMap }}
+          configMap:
+            name: {{ .Values.museum.customCA.existingConfigMap }}
+          {{- else }}
+          {{- fail "museum.customCA.enabled requires either existingSecret or existingConfigMap" }}
+          {{- end }}
+        {{- end }}
         {{- if .Values.museum.persistence.data.enabled }}
         - name: data
           persistentVolumeClaim:
