@@ -20,7 +20,7 @@ maintainers:
   - name: L4G
     email: contact@l4g.dev
 type: application
-version: 0.2.0
+version: 0.2.1
 appVersion: "latest"
 
 annotations:
@@ -37,6 +37,8 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |
+    - kind: fixed
+      description: Fix webfronted default ports in NetworkPolicy
     - kind: added
       description: New web.albums component (port 3002) so public album sharing works (#2)
     - kind: added
