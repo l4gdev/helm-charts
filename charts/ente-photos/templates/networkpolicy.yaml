@@ -43,7 +43,7 @@ spec:
           podSelector: {}
       ports:
         - protocol: TCP
-          port: {{ .Values.web.auth.containerPort | default 3000 }}
+          port: {{ .Values.web.auth.containerPort | default 3003 }}
     {{- end }}
     {{- if .Values.web.accounts.enabled }}
     - from:
@@ -51,7 +51,7 @@ spec:
           podSelector: {}
       ports:
         - protocol: TCP
-          port: {{ .Values.web.accounts.containerPort | default 3000 }}
+          port: {{ .Values.web.accounts.containerPort | default 3001 }}
     {{- end }}
     {{- if .Values.web.cast.enabled }}
     - from:
@@ -59,7 +59,7 @@ spec:
           podSelector: {}
       ports:
         - protocol: TCP
-          port: {{ .Values.web.cast.containerPort | default 3000 }}
+          port: {{ .Values.web.cast.containerPort | default 3004 }}
     {{- end }}
     {{- if .Values.web.share.enabled }}
     - from:
@@ -67,7 +67,15 @@ spec:
           podSelector: {}
       ports:
         - protocol: TCP
-          port: {{ .Values.web.share.containerPort | default 3000 }}
+          port: {{ .Values.web.share.containerPort | default 3005 }}
+    {{- end }}
+    {{- if .Values.web.albums.enabled }}
+    - from:
+        - namespaceSelector: {}
+          podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.web.share.containerPort | default 3002 }}
     {{- end }}
     {{- with .Values.networkPolicy.additionalIngressRules }}
     {{- toYaml . | nindent 4 }}
