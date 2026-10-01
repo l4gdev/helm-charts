@@ -1,0 +1,41 @@
+apiVersion: v2
+name: inbox-zero
+description: Helm chart for Inbox Zero — an open-source AI email assistant (web, BullMQ worker, CronJobs, optional bundled Postgres / Redis)
+type: application
+version: 0.1.0
+appVersion: "latest"
+icon: https://raw.githubusercontent.com/elie222/inbox-zero/main/apps/web/public/icons/icon-192x192.png
+home: https://github.com/l4gdev/helm-charts/tree/main/charts/inbox-zero
+sources:
+  - https://github.com/elie222/inbox-zero
+  - https://github.com/l4gdev/helm-charts
+maintainers:
+  - name: L4G
+    email: contact@l4g.dev
+keywords:
+  - inbox-zero
+  - email
+  - ai
+  - gmail
+  - outlook
+  - nextjs
+  - self-hosted
+kubeVersion: ">=1.23.0-0"
+annotations:
+  artifacthub.io/category: integration-delivery
+  artifacthub.io/license: AGPL-3.0
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/l4gdev/helm-charts/tree/main/charts/inbox-zero
+    - name: Inbox Zero GitHub
+      url: https://github.com/elie222/inbox-zero
+    - name: Kubernetes guide
+      url: https://docs.getinboxzero.com/hosting/kubernetes
+    - name: Environment variables
+      url: https://docs.getinboxzero.com/hosting/environment-variables
+  artifacthub.io/operator: "false"
+  artifacthub.io/prerelease: "false"
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial import of the upstream Inbox Zero chart (web, worker, CronJobs, migration Job, bundled Postgres / Redis / Redis HTTP bridge, external DB / Redis support)

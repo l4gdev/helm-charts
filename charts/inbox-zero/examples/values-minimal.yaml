@@ -1,0 +1,35 @@
+# "Kick the tires" install: bundled Postgres, Redis and Redis HTTP bridge,
+# app secrets inline, no Ingress. Reach it with:
+#   kubectl port-forward svc/inbox-zero-web 3000:80
+#
+# Generate every secret below with: openssl rand -hex 32
+# NEXT_PUBLIC_BASE_URL must match what you type in the browser and what is
+# registered as the OAuth redirect origin in Google / Microsoft.
+
+env:
+  NEXT_PUBLIC_BASE_URL: http://localhost:3000
+  DEFAULT_LLMS: openai:gpt-5.4-mini
+  GOOGLE_PUBSUB_TOPIC_NAME: projects/your-project/topics/inbox-zero
+
+secretEnv:
+  AUTH_SECRET: replace-me
+  EMAIL_ENCRYPT_SECRET: replace-me
+  EMAIL_ENCRYPT_SALT: replace-me
+  INTERNAL_API_KEY: replace-me
+  API_KEY_SALT: replace-me
+  CRON_SECRET: replace-me
+  GOOGLE_CLIENT_ID: replace-me
+  GOOGLE_CLIENT_SECRET: replace-me
+  GOOGLE_PUBSUB_VERIFICATION_TOKEN: replace-me
+  OPENAI_API_KEY: replace-me
+
+postgresql:
+  auth:
+    password: replace-me
+
+redis:
+  auth:
+    password: replace-me
+
+redisHttp:
+  token: replace-me

@@ -11,6 +11,7 @@ A collection of production-ready Helm charts for self-hosted services.
 | **[bulwark-mail](charts/bulwark-mail)** | 1.6.0 | [Bulwark](https://github.com/bulwarkmail/webmail) JMAP webmail. Native Ingress, multi-host TLS, OIDC, optional ServiceMonitor / NetworkPolicy / PVC for settings sync. |
 | **[chibisafe](charts/chibisafe)** | latest | [Chibisafe](https://github.com/chibisafe/chibisafe) file vault and sharing platform. |
 | **[ente-photos](charts/ente-photos)** | latest | [Ente Photos](https://github.com/ente-io/ente) end-to-end encrypted photo storage. Bundled museum API + photos / albums / accounts / auth / cast / share frontends; optional custom CA mount, ServiceMonitor, NetworkPolicy, PDB. |
+| **[inbox-zero](charts/inbox-zero)** | latest | [Inbox Zero](https://github.com/elie222/inbox-zero) AI email assistant. Web + BullMQ worker + CronJobs, Prisma migration Job, optional bundled Postgres / Redis / Redis HTTP bridge or external managed services. |
 | **[overpass-api](charts/overpass-api)** | latest | [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API) — read-only OpenStreetMap query service. |
 | **[stalwart-mail-ha](charts/stalwart-mail-ha)** | 0.16.3 | [Stalwart](https://github.com/stalwartlabs/stalwart) mail server (SMTP, IMAP, JMAP, CalDAV/CardDAV) with multi-replica HA. Postgres / MySQL / FoundationDB / RocksDB / SQLite data stores, separate mail and HTTP Services, optional Ingress / ServiceMonitor / NetworkPolicy / PDB / HPA. |
 
@@ -29,6 +30,7 @@ helm repo update
 helm install bulwark   l4gdev/bulwark-mail     -f my-values.yaml
 helm install chibisafe l4gdev/chibisafe        -f my-values.yaml
 helm install ente      l4gdev/ente-photos      -f my-values.yaml
+helm install inbox     l4gdev/inbox-zero       -f my-values.yaml
 helm install overpass  l4gdev/overpass-api     -f my-values.yaml
 helm install mail      l4gdev/stalwart-mail-ha -f my-values.yaml
 ```

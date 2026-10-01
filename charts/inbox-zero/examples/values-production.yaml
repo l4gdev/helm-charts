@@ -1,0 +1,61 @@
+# Production shape: managed Postgres and Redis, every credential in
+# pre-created Secrets (plain, External Secrets, Sealed Secrets, SOPS...),
+# Ingress with TLS. Helm runs Prisma migrations in a pre-install/pre-upgrade Job.
+#
+# Required Secrets (same namespace as the release):
+#   inbox-zero-secrets   app env: AUTH_SECRET, EMAIL_ENCRYPT_SECRET, EMAIL_ENCRYPT_SALT,
+#                        INTERNAL_API_KEY, API_KEY_SALT, CRON_SECRET, GOOGLE_CLIENT_ID,
+#                        GOOGLE_CLIENT_SECRET, GOOGLE_PUBSUB_VERIFICATION_TOKEN,
+#                        OPENAI_API_KEY (or another LLM key), MICROSOFT_* if used
+#   inbox-zero-database  DATABASE_URL, DIRECT_URL
+#   inbox-zero-redis     REDIS_URL, REDIS_HTTP_URL, REDIS_HTTP_TOKEN
+
+image:
+  # Pin a tag for reproducible upgrades instead of tracking latest.
+  tag: latest
+  pullPolicy: IfNotPresent
+
+web:
+  replicaCount: 2
+
+existingSecret: inbox-zero-secrets
+
+env:
+  NEXT_PUBLIC_BASE_URL: https://inbox.example.com
+  DEFAULT_LLMS: openai:gpt-5.4-mini
+  GOOGLE_PUBSUB_TOPIC_NAME: projects/your-project/topics/inbox-zero
+  QUEUE_BACKEND: bullmq
+
+externalDatabase:
+  enabled: true
+  existingSecret:
+    name: inbox-zero-database
+
+externalRedis:
+  enabled: true
+  existingSecret:
+    name: inbox-zero-redis
+
+postgresql:
+  enabled: false
+
+redis:
+  enabled: false
+
+redisHttp:
+  enabled: false
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: inbox.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: inbox-zero-tls
+      hosts:
+        - inbox.example.com

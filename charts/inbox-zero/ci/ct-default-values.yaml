@@ -1,0 +1,8 @@
+postgresql:
+  auth:
+    password: ct-postgres-password
+redis:
+  auth:
+    password: ct-redis-password
+redisHttp:
+  token: ct-redis-http-token
