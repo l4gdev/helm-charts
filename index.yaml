@@ -25,10 +25,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: 1.6.0
-    created: "2026-05-04T10:50:47.822818241Z"
+    created: "2026-10-01T16:52:27.775979493Z"
     description: Helm chart for Bulwark Mail — a self-hosted JMAP webmail with native
       Ingress and multi-host TLS
-    digest: 0943d3f6ca02060622819bd6b89aa5bfb5b858f7ffb39dda96ffbb71cf844c2d
+    digest: 47b4855fce19e040beb38f4b975cad5785cf858b5312c35f5ec4e290420bbb12
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail
     icon: https://raw.githubusercontent.com/bulwarkmail/webmail/main/public/icon-192x192.png
     keywords:
@@ -116,10 +116,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2026-05-04T10:50:47.823877074Z"
+    created: "2026-10-01T16:52:27.777236501Z"
     description: A Helm chart for Chibisafe - blazing fast file vault and sharing
       platform
-    digest: 4c2ccac17cf0c06a2ad9c03420dc77eaad3391da7b1771126a0cc5b8ff5c8bfe
+    digest: 081d3403ccc39aae5f56609241b14bfdfcf0cca8deb80156b240dd69e4656e3c
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/chibisafe
     icon: https://chibisafe.app/img/logo.svg
     keywords:
@@ -213,10 +213,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2026-05-04T10:50:47.827118819Z"
+    created: "2026-10-01T16:52:27.779646533Z"
     description: A Helm chart for Ente Photos - end-to-end encrypted photo storage
       and backup platform
-    digest: ad53c424aee11cc5c31fab58dca63d3d415f9d73885375af924eb33fceab79c6
+    digest: 4908553054cade34ea1499decd332e9cff7b1a56679f20d12d310d43c99a0b3a
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/ente-photos
     icon: https://ente.io/assets/ente-photos-icon-transparent.png
     keywords:
@@ -335,14 +335,14 @@ entries:
   freescout:
   - apiVersion: v2
     appVersion: php8.2-1.17.72
-    created: "2026-05-04T10:50:47.830853966Z"
+    created: "2026-10-01T16:52:27.783918429Z"
     dependencies:
     - condition: mariadb.enabled
       name: mariadb
       repository: https://charts.bitnami.com/bitnami
       version: ~11.x
     description: A Helm chart for Kubernetes
-    digest: 9bfb18d1d6bd74b3719f732627c0a60ec62adb32e194a545bb44a42d0da722ee
+    digest: a39d4ce4a4b89f2c9ffd9a9f72cc3d6624bf600a4762e01d83dba813630712da
     icon: https://freescout.net/apple-touch-icon.png
     maintainers:
     - email: contact@l4g.dev
@@ -351,6 +351,53 @@ entries:
     type: application
     urls:
     - https://l4gdev.github.io/helm-charts/charts/freescout-0.1.0.tgz
+    version: 0.1.0
+  inbox-zero:
+  - annotations:
+      artifacthub.io/category: integration-delivery
+      artifacthub.io/changes: |
+        - kind: added
+          description: Initial import of the upstream Inbox Zero chart (web, worker, CronJobs, migration Job, bundled Postgres / Redis / Redis HTTP bridge, external DB / Redis support)
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/license: AGPL-3.0
+      artifacthub.io/links: |
+        - name: Chart Source
+          url: https://github.com/l4gdev/helm-charts/tree/main/charts/inbox-zero
+        - name: Inbox Zero GitHub
+          url: https://github.com/elie222/inbox-zero
+        - name: Kubernetes guide
+          url: https://docs.getinboxzero.com/hosting/kubernetes
+        - name: Environment variables
+          url: https://docs.getinboxzero.com/hosting/environment-variables
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: latest
+    created: "2026-10-01T16:52:27.785106799Z"
+    description: Helm chart for Inbox Zero — an open-source AI email assistant (web,
+      BullMQ worker, CronJobs, optional bundled Postgres / Redis)
+    digest: 99b0379ca583043d5a82f04664ad7c7d97a906cec55b46c8afc84bdce241b44b
+    home: https://github.com/l4gdev/helm-charts/tree/main/charts/inbox-zero
+    icon: https://raw.githubusercontent.com/elie222/inbox-zero/main/apps/web/public/icons/icon-192x192.png
+    keywords:
+    - inbox-zero
+    - email
+    - ai
+    - gmail
+    - outlook
+    - nextjs
+    - self-hosted
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: contact@l4g.dev
+      name: L4G
+    name: inbox-zero
+    sources:
+    - https://github.com/elie222/inbox-zero
+    - https://github.com/l4gdev/helm-charts
+    type: application
+    urls:
+    - https://l4gdev.github.io/helm-charts/charts/inbox-zero-0.1.0.tgz
     version: 0.1.0
   overpass-api:
   - annotations:
@@ -375,9 +422,9 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: latest
-    created: "2026-05-04T10:50:47.831984836Z"
+    created: "2026-10-01T16:52:27.786243902Z"
     description: A Helm chart for deploying Overpass API - OpenStreetMap query service
-    digest: dab03e9bb81edb236e56b4e0a309057aec1adcff36791f2ec4e3940a38ce1783
+    digest: fb825fa730eeb09f23a16f6adefc1c444889a0da4eb91640f2124e30809c0141
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/overpass-api
     icon: https://wiki.openstreetmap.org/w/images/b/b5/Overpass_API_logo.svg
     keywords:
@@ -522,10 +569,10 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: 0.16.3
-    created: "2026-05-04T10:50:47.834270216Z"
+    created: "2026-10-01T16:52:27.787748385Z"
     description: Helm chart for Stalwart Mail Server (SMTP, IMAP, JMAP, CalDAV/CardDAV)
       running multi-replica with all state on external backends
-    digest: 223008a83c5ba1165665a18c706f46aaae837762effc86934c839ae0176ec065
+    digest: 0ccdef3dd70ca304abdd2d466382d9b079707392e1ddef17e02e9e6df63f60fd
     home: https://github.com/l4gdev/helm-charts/tree/main/charts/stalwart-mail-ha
     icon: https://raw.githubusercontent.com/stalwartlabs/stalwart/main/img/logo-red.svg
     keywords:
@@ -606,4 +653,4 @@ entries:
     urls:
     - https://l4gdev.github.io/helm-charts/charts/stalwart-mail-ha-0.1.1.tgz
     version: 0.1.1
-generated: "2026-05-04T10:50:47.821425523Z"
+generated: "2026-10-01T16:52:27.774364432Z"
