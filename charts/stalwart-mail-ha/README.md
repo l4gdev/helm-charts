@@ -133,8 +133,9 @@ Server-side binding (which protocol speaks on which port) is part of the runtime
 Each is gated behind `<resource>.enabled`:
 
 - `ingress` — HTTP/JMAP/admin only, multi-host TLS supported.
+- `ingress.extra` — additional Ingress objects for the same Service with their own annotations (e.g. `whitelist-source-range` / `limit-rps` on the admin UI or auth endpoints only).
 - `metrics.serviceMonitor` — Prometheus scrape, supports bearer-token auth.
-- `networkPolicy` — namespace-level ingress, DNS + outbound SMTP egress.
+- `networkPolicy` — namespace-level ingress (or explicit `ingressFrom` peers, e.g. only the ingress-controller pods), DNS + outbound SMTP/HTTP egress, `additionalEgressRules` for your data stores.
 - `podDisruptionBudget` — `minAvailable` or `maxUnavailable`.
 - `autoscaling` — HPA on CPU and / or memory.
 

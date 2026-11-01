@@ -171,6 +171,24 @@ ingress:
   #  - secretName: stalwart-http-tls
   #    hosts:
   #      - mail.example.com
+  # Additional Ingress objects for the same backend, each with its own
+  # annotations (ingress-nginx annotations are per-Ingress). Typical use: an
+  # IP allowlist or rate limit on the admin UI / auth endpoints only.
+  # className defaults to ingress.className. Rendered independently of
+  # ingress.enabled.
+  extra: []
+  #  - name: admin
+  #    annotations:
+  #      nginx.ingress.kubernetes.io/whitelist-source-range: "203.0.113.0/24,198.51.100.7/32"
+  #    hosts:
+  #      - host: admin.mail.example.com
+  #        paths:
+  #          - path: /
+  #            pathType: Prefix
+  #    tls:
+  #      - secretName: admin-mail-tls
+  #        hosts:
+  #          - admin.mail.example.com
 
 # -----------------------------------------------------------------------------
 # Data store
@@ -383,6 +401,16 @@ networkPolicy:
   enabled: false
   # When empty, all namespaces are permitted to reach mail listeners.
   ingressNamespaceSelector: {}
+  # Explicit list of NetworkPolicyPeer entries for the listener ingress rule.
+  # Takes precedence over ingressNamespaceSelector; use it to restrict the
+  # listeners to specific pods (e.g. the ingress controller) instead of a whole namespace.
+  ingressFrom: []
+  #  - namespaceSelector:
+  #      matchLabels:
+  #        kubernetes.io/metadata.name: ingress-nginx
+  #    podSelector:
+  #      matchLabels:
+  #        app.kubernetes.io/name: ingress-nginx
   additionalIngressRules: []
   additionalEgressRules: []
   # Allow outbound 25/tcp so the server can deliver mail. Disable only if you

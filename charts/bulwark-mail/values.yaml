@@ -99,6 +99,24 @@ ingress:
   #    hosts:
   #      - mail.example.com
   #      - webmail.example.com
+  # Additional Ingress objects for the same backend, each with its own
+  # annotations (ingress-nginx annotations are per-Ingress). Typical use: an
+  # IP allowlist or rate limit on the admin UI / auth endpoints only.
+  # className defaults to ingress.className. Rendered independently of
+  # ingress.enabled.
+  extra: []
+  #  - name: admin
+  #    annotations:
+  #      nginx.ingress.kubernetes.io/whitelist-source-range: "203.0.113.0/24,198.51.100.7/32"
+  #    hosts:
+  #      - host: admin.mail.example.com
+  #        paths:
+  #          - path: /
+  #            pathType: Prefix
+  #    tls:
+  #      - secretName: admin-mail-tls
+  #        hosts:
+  #          - admin.mail.example.com
 
 # -----------------------------------------------------------------------------
 # Probes
@@ -243,6 +261,9 @@ metrics:
 networkPolicy:
   enabled: false
   ingressNamespaceSelector: {}
+  # Explicit NetworkPolicyPeer list for the HTTP ingress rule; takes precedence
+  # over ingressNamespaceSelector (restrict to the ingress controller pods).
+  ingressFrom: []
   additionalIngressRules: []
   additionalEgressRules: []
   # Bulwark needs to reach the JMAP server. Allow egress to the cluster DNS,
