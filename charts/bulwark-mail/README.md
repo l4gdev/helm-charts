@@ -134,6 +134,32 @@ ingress:
         - webmail.example.com
 ```
 
+
+#### Extra ingresses (admin allowlist, rate limits)
+
+ingress-nginx annotations apply per Ingress object, so to put an IP allowlist or a rate
+limit on `/admin` and `/api/admin` only, declare an additional Ingress for those paths:
+
+```yaml
+ingress:
+  extra:
+    - name: admin
+      annotations:
+        nginx.ingress.kubernetes.io/whitelist-source-range: "203.0.113.0/24"
+      hosts:
+        - host: mail.example.com
+          paths:
+            - path: /admin
+              pathType: Prefix
+            - path: /api/admin
+              pathType: Prefix
+```
+
+Extra ingresses reuse `ingress.className` unless they set their own, render independently of
+`ingress.enabled`, and can be switched off individually with `enabled: false`.
+
+`networkPolicy.ingressFrom` accepts a list of NetworkPolicyPeer entries and, when set, replaces
+the namespace-wide default so only e.g. the ingress-controller pods may reach the webmail port.
 ### Settings sync
 
 By default Bulwark stores per-user settings server-side under `/app/data`.

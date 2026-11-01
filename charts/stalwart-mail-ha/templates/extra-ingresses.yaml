@@ -1,0 +1,56 @@
+{{- /*
+Additional Ingress objects sharing the same backend Service. Use them when a
+subset of paths needs different nginx annotations than the main ingress, e.g.
+an IP allowlist (whitelist-source-range) or rate limits (limit-rps) on the
+admin UI / auth endpoints only. Annotations are per-Ingress in ingress-nginx,
+so this cannot be expressed on the main ingress.
+*/ -}}
+{{- $root := . -}}
+{{- $fullName := include "stalwart-mail-ha.fullname" . -}}
+{{- $svcName := printf "%s-http" $fullName -}}
+{{- $svcPort := .Values.service.http.port -}}
+{{- range .Values.ingress.extra }}
+{{- if or (not (hasKey . "enabled")) .enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-%s" $fullName (required "ingress.extra[].name is required" .name) }}
+  labels:
+    {{- include "stalwart-mail-ha.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: ingress-{{ .name }}
+  {{- with .annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with (default $root.Values.ingress.className .className) }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with .tls }}
+  tls:
+    {{- range . }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ $svcName }}
+                port:
+                  number: {{ $svcPort }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- end }}

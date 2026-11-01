@@ -2,7 +2,7 @@ apiVersion: v2
 name: bulwark-mail
 description: Helm chart for Bulwark Mail — a self-hosted JMAP webmail with native Ingress and multi-host TLS
 type: application
-version: 0.2.2
+version: 0.2.3
 appVersion: "1.6.0"
 icon: https://raw.githubusercontent.com/bulwarkmail/webmail/main/public/icon-192x192.png
 home: https://github.com/l4gdev/helm-charts/tree/main/charts/bulwark-mail
